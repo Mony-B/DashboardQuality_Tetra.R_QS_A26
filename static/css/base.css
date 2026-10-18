@@ -1,0 +1,85 @@
+/* Estilos base de Dashboard SQA. Los colores viven en variables para cambiarlos en un solo lugar. */
+:root {
+  --fondo: #f6f7f9;
+  --superficie: #ffffff;
+  --texto: #1d2330;
+  --texto-suave: #5b6475;
+  --borde: #d9dde5;
+  --primario: #2f5bd3;
+  --primario-texto: #ffffff;
+  --error: #b42318;
+  --exito: #067647;
+  --radio: 8px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.5;
+}
+
+a { color: var(--primario); }
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+  flex-wrap: wrap;
+}
+
+.marca { font-weight: 700; text-decoration: none; color: var(--texto); }
+
+.menu { display: flex; gap: 1rem; flex: 1; flex-wrap: wrap; }
+.menu-item { color: var(--texto-suave); text-decoration: none; }
+.menu-item.pendiente { opacity: 0.5; cursor: default; }
+
+.salir { display: flex; align-items: center; gap: 0.75rem; margin: 0; }
+.usuario { color: var(--texto-suave); }
+
+.contenido { max-width: 72rem; margin: 2rem auto; padding: 0 1rem; }
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.5rem;
+}
+.tarjeta-acceso { max-width: 26rem; margin: 3rem auto; }
+
+.nota { color: var(--texto-suave); }
+
+.campo { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 1rem; }
+.campo label { font-weight: 600; }
+.campo input, .campo select, .campo textarea {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font: inherit;
+}
+.campo-error input, .campo-error select, .campo-error textarea { border-color: var(--error); }
+.ayuda { color: var(--texto-suave); }
+.ayuda ul { margin: 0.25rem 0 0; padding-left: 1.25rem; }
+.error { color: var(--error); margin: 0; font-size: 0.9rem; }
+
+.boton {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--primario);
+  border-radius: var(--radio);
+  background: var(--primario);
+  color: var(--primario-texto);
+  font: inherit;
+  cursor: pointer;
+}
+.boton-secundario { background: transparent; color: var(--primario); }
+
+.mensajes { list-style: none; padding: 0; margin: 0 0 1rem; }
+.mensaje { padding: 0.75rem 1rem; border-radius: var(--radio); background: var(--superficie); border: 1px solid var(--borde); }
+.mensaje-success { border-color: var(--exito); color: var(--exito); }
+.mensaje-error { border-color: var(--error); color: var(--error); }

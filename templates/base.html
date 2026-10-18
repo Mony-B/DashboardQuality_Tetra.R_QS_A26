@@ -1,0 +1,44 @@
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Dashboard SQA{% endblock %} · Dashboard SQA</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block estilos %}{% endblock %}
+</head>
+<body>
+  {% if user.is_authenticated %}
+  <header class="barra">
+    <a class="marca" href="{% url 'core:inicio' %}">Dashboard SQA</a>
+    <nav class="menu">
+      {# Se activan conforme se agreguen las apps de cada caso de uso #}
+      <span class="menu-item pendiente" title="CU 01">Mis proyectos</span>
+      <span class="menu-item pendiente" title="CU 02">Captura de medidas</span>
+      <span class="menu-item pendiente" title="CU 03">Actividades SQA</span>
+      <span class="menu-item pendiente" title="CU 04">Dashboard</span>
+      <span class="menu-item pendiente" title="CU 05">Reportes</span>
+    </nav>
+    <form method="post" action="{% url 'cuentas:cerrar_sesion' %}" class="salir">
+      {% csrf_token %}
+      <span class="usuario">{{ user.username }}</span>
+      <button type="submit" class="boton boton-secundario">Cerrar sesión</button>
+    </form>
+  </header>
+  {% endif %}
+
+  <main class="contenido">
+    {% if messages %}
+    <ul class="mensajes">
+      {% for message in messages %}
+      <li class="mensaje mensaje-{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% block contenido %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

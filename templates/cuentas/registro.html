@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block titulo %}Crear cuenta{% endblock %}
+
+{% block contenido %}
+<section class="tarjeta tarjeta-acceso">
+  <h1>Crear cuenta</h1>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% for campo in form %}
+      {% include "includes/campo.html" with campo=campo %}
+    {% endfor %}
+    <button type="submit" class="boton">Crear cuenta</button>
+  </form>
+
+  <p class="nota">¿Ya tienes cuenta? <a href="{% url 'cuentas:iniciar_sesion' %}">Inicia sesión</a></p>
+</section>
+{% endblock %}

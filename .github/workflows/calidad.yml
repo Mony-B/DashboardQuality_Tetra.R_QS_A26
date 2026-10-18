@@ -1,0 +1,41 @@
+name: Calidad
+
+# Corre en cada push y pull request: es la parte automática de la compuerta
+# de revisión entre pares (ver CONTRIBUTING.md).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  calidad:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SECRET_KEY: clave-solo-para-ci
+      DJANGO_DEBUG: "0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt
+
+      - name: Estilo y errores (ruff)
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Seguridad (bandit, falla con severidad alta)
+        run: bandit -c pyproject.toml -r apps config -lll
+
+      - name: Migraciones al día
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Pruebas con cobertura
+        run: |
+          coverage run manage.py test
+          coverage report

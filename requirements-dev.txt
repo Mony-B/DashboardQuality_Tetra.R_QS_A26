@@ -1,0 +1,6 @@
+-r requirements.txt
+
+# Herramientas de calidad de la Estrategia de Aseguramiento de Calidad
+ruff>=0.6          # estilo y errores (PEP 8 + convenciones)
+bandit[toml]>=1.7  # análisis estático de seguridad (R24)
+coverage>=7.0      # cobertura de pruebas unitarias

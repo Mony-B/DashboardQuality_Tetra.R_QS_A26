@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block titulo %}Iniciar sesión{% endblock %}
+
+{% block contenido %}
+<section class="tarjeta tarjeta-acceso">
+  <h1>Dashboard SQA</h1>
+  <p class="nota">Cada usuario ve solo sus propios proyectos.</p>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      {% for error in form.non_field_errors %}<p class="error">{{ error }}</p>{% endfor %}
+    {% endif %}
+    {% include "includes/campo.html" with campo=form.username %}
+    {% include "includes/campo.html" with campo=form.password %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="boton">Entrar</button>
+  </form>
+
+  <p class="nota"><a href="{% url 'cuentas:registro' %}">Crear cuenta</a></p>
+</section>
+{% endblock %}

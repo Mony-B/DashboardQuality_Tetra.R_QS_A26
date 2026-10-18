@@ -1,0 +1,45 @@
+[project]
+name = "dashboard-sqa"
+version = "0.1.0"
+description = "Centro de control de la calidad para equipos de desarrollo (Django MVT)."
+requires-python = ">=3.12"
+
+# ---------------------------------------------------------------------------
+# ruff: estilo y errores (guía de codificación: PEP 8 + convenciones Django)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["**/migrations/*"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle (PEP 8)
+    "F",       # pyflakes (errores)
+    "I",       # orden de imports
+    "B",       # bugbear (errores comunes)
+    "UP",      # sintaxis moderna de Python
+    "DJ",      # convenciones de Django
+    "N",       # nombres (PEP 8)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+
+# ---------------------------------------------------------------------------
+# bandit: seguridad (R24: 0 hallazgos de severidad alta antes de cada entrega)
+# ---------------------------------------------------------------------------
+[tool.bandit]
+exclude_dirs = ["migrations", ".venv", "venv", "staticfiles"]
+
+# ---------------------------------------------------------------------------
+# coverage: cobertura de pruebas
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["apps"]
+omit = ["*/migrations/*", "*/tests/*"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
