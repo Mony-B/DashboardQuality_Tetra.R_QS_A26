@@ -22,8 +22,6 @@ pip install -r requirements-dev.txt
 cp .env.example .env               # Windows: copy .env.example .env
 
 # 4. Base de datos y usuario administrador
-#    (solo quien sube el repo por primera vez: python manage.py makemigrations cuentas,
-#     y hace commit de apps/cuentas/migrations/0001_initial.py)
 python manage.py migrate
 python manage.py createsuperuser
 
