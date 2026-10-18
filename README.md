@@ -6,7 +6,7 @@ Centro de control de la calidad para equipos de desarrollo: registra proyectos p
 
 **Equipo Tetra.R** · Django 5.2 · patrón MVT
 
-## Arrancar en tu máquina
+## Para que funcione en la lap:
 
 Requiere Python 3.12 o superior.
 
