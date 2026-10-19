@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block titulo %}Captura de medidas · {{ periodo.nombre }}{% endblock %}
+
+{% block migas %}
+<nav class="migas" aria-label="Ruta">
+  {{ periodo.proyecto.nombre }} · {{ periodo.nombre }} ({{ periodo.fecha_inicio|date:"d/m/Y" }} – {{ periodo.fecha_fin|date:"d/m/Y" }})
+</nav>
+{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Captura de medidas</h1>
+    <p class="nota">Este periodo todavía no tiene medidas. Captura los dos totales de cada métrica (CU 02).</p>
+  </div>
+</header>
+
+{# PROVISIONAL: el formulario real llega con el CU 02 #}
+<p class="aviso">La captura de medidas se habilita con el CU 02.</p>
+<ul class="tarjetas">
+  {% for metrica in metricas %}
+  <li class="tarjeta">
+    <h2>{{ metrica.nombre }}</h2>
+    <p class="nota">Meta sugerida: <span class="dato">{{ metrica.meta_sugerida }} %</span></p>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

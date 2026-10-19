@@ -39,3 +39,13 @@ jobs:
         run: |
           coverage run manage.py test
           coverage report
+          coverage html -d reportes/cobertura
+
+      # Evidencia para Drive: en la pestaña Actions, abre la ejecución y descarga "reporte-cobertura"
+      - name: Guardar reporte de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-cobertura
+          path: reportes/cobertura
+          retention-days: 90

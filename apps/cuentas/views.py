@@ -21,7 +21,7 @@ class CerrarSesionView(auth_views.LogoutView):
 class RegistroView(CreateView):
     form_class = RegistroForm
     template_name = "cuentas/registro.html"
-    success_url = reverse_lazy("core:inicio")
+    success_url = reverse_lazy("proyectos:mis_proyectos")
 
     def form_valid(self, form):
         respuesta = super().form_valid(form)
