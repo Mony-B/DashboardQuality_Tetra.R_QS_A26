@@ -24,17 +24,25 @@ dashboard-sqa/
 └── docs/
 ```
 
-## Apps previstas
+## Apps por caso de uso
 
 Cada caso de uso vive en su propia app dentro de `apps/`:
 
-| App | Caso de uso | Requisitos |
-|---|---|---|
-| `proyectos` | CU 01 · Iniciar el monitoreo de un proyecto | R2–R4 |
-| `medidas` | CU 02 · Registrar las medidas del periodo | R5–R7 |
-| `actividades` | CU 03 · Planear y dar seguimiento a las actividades SQA | R8–R9 |
-| `tablero` | CU 04 · Evaluar la salud del proyecto | R10–R18 |
-| `reportes` | CU 05 · Generar el reporte de salud | R19 |
+| App | Caso de uso | Requisitos | Estado |
+|---|---|---|---|
+| `proyectos` | CU 01 · Iniciar el monitoreo de un proyecto | R2–R4 | Implementado |
+| `medidas` | CU 02 · Registrar las medidas del periodo | R5–R7 | Solo la pantalla de destino del CU 01 |
+| `actividades` | CU 03 · Planear y dar seguimiento a las actividades SQA | R8–R9 | Pendiente |
+| `tablero` | CU 04 · Evaluar la salud del proyecto | R10–R18 | Pendiente |
+| `reportes` | CU 05 · Generar el reporte de salud | R19 | Pendiente |
+
+## Modelo de datos (hasta CU 01)
+
+- **Proyecto**: `usuario`, `nombre` (≤ 100, único por usuario), `marco_trabajo` (≤ 50), `descripcion` (≤ 500, opcional).
+- **Periodo**: `proyecto`, `nombre` (≤ 50, único por proyecto), `fecha_inicio`, `fecha_fin` (≥ inicio, la BD lo valida). Los periodos de un proyecto no se traslapan (lo valida el form). El periodo actual es el de inicio más reciente.
+- **MetaProyecto**: `proyecto`, `metrica`, `valor` (%). Se crean las 5 metas sugeridas al registrar el proyecto.
+
+El catálogo de las 5 métricas (claves, metas sugeridas y mínimos) está en `apps/proyectos/metricas.py`; CU 02 y CU 04 deben usarlo en lugar de repetir los valores.
 
 Para crear una: `mkdir apps/<nombre> && python manage.py startapp <nombre> apps/<nombre>`, luego en su `apps.py` poner `name = "apps.<nombre>"` y agregarla a `INSTALLED_APPS`.
 

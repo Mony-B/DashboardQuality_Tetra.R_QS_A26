@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis proyectos{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Mis proyectos</h1>
+    <p class="nota">Solo ves los proyectos que tú registraste.</p>
+  </div>
+  <a class="boton" href="{% url 'proyectos:nuevo' %}">+ Nuevo proyecto</a>
+</header>
+
+{% if proyectos %}
+<ul class="tarjetas">
+  {% for proyecto in proyectos %}
+  {% with periodo=proyecto.periodo_actual %}
+  <li class="tarjeta tarjeta-proyecto">
+    <h2>{{ proyecto.nombre }}</h2>
+    <p class="nota">
+      {{ proyecto.marco_trabajo }} · Periodo actual: {{ periodo.nombre|default:"—" }}<br>
+      {% if periodo %}<span class="dato">{{ periodo.fecha_inicio|date:"d/m/Y" }} – {{ periodo.fecha_fin|date:"d/m/Y" }}</span>{% endif %}
+    </p>
+    <p class="dato">Métricas en meta: {{ proyecto.metricas_en_meta }}/5</p>
+    <div class="acciones">
+      <a class="boton boton-secundario" href="{% url 'proyectos:nuevo_periodo' proyecto.pk %}">Nuevo periodo</a>
+      {# El enlace se activa con el CU 04 #}
+      <span class="enlace pendiente" title="CU 04">Ver salud →</span>
+    </div>
+  </li>
+  {% endwith %}
+  {% endfor %}
+</ul>
+<p class="nota">"Nuevo periodo" abre un periodo en un proyecto que ya existe. Dos proyectos distintos pueden tener periodos en las mismas fechas.</p>
+{% else %}
+<section class="tarjeta vacio">
+  <h2>Todavía no tienes proyectos</h2>
+  <p class="nota">Registra tu primer proyecto y su periodo para empezar a monitorear su calidad.</p>
+  <a class="boton" href="{% url 'proyectos:nuevo' %}">+ Nuevo proyecto</a>
+</section>
+{% endif %}
+{% endblock %}
