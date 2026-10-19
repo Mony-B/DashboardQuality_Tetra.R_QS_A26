@@ -277,6 +277,27 @@ class FA5NombreRepetidoTests(BaseCU01):
         )
 
 
+class EnvioRepetidoTests(BaseCU01):
+    """Checklist de implementación #37: repetir el envío no duplica registros."""
+
+    def test_reenviar_nuevo_proyecto_no_duplica(self):
+        self.client.post(URL_NUEVO, datos_proyecto())
+        self.client.post(URL_NUEVO, datos_proyecto())
+        self.assertEqual(Proyecto.objects.count(), 1)
+
+    def test_reenviar_nuevo_proyecto_no_duplica_metas_ni_periodos(self):
+        self.client.post(URL_NUEVO, datos_proyecto())
+        self.client.post(URL_NUEVO, datos_proyecto())
+        self.assertEqual((MetaProyecto.objects.count(), Periodo.objects.count()), (5, 1))
+
+    def test_reenviar_nuevo_periodo_no_duplica(self):
+        proyecto = self.crear_proyecto()
+        url = reverse("proyectos:nuevo_periodo", args=[proyecto.pk])
+        self.client.post(url, datos_periodo())
+        self.client.post(url, datos_periodo())
+        self.assertEqual(proyecto.periodos.count(), 2)
+
+
 class FE1CancelarTests(BaseCU01):
     def test_formulario_tiene_cancelar_con_confirmacion(self):
         respuesta = self.client.get(URL_NUEVO)
