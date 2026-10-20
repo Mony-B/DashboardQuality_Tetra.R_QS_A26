@@ -13,7 +13,7 @@
   {% with app=request.resolver_match.app_name %}
   <aside class="lateral">
     <a class="marca" href="{% url 'proyectos:mis_proyectos' %}">
-      <img src="{% static 'img/logo.png' %}" alt="QuaQlity" class="logo">
+      <img src="{% static 'img/logo.png' %}" alt="QuaQlity" class="logo" style="display:block;width:100%;max-width:10rem;height:auto">
     </a>
     <nav class="menu" aria-label="Principal">
       <a class="menu-item{% if app == 'proyectos' %} activo{% endif %}" href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a>
