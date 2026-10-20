@@ -51,7 +51,8 @@ h2 { font-size: 1.05rem; margin: 0 0 0.5rem; }
   top: 0;
   height: 100vh;
 }
-.marca { font-weight: 700; text-decoration: none; padding: 0 0.5rem; }
+.marca { display: block; text-decoration: none; padding: 0 0.5rem; }
+.logo { display: block; width: 100%; max-width: 10rem; height: auto; }
 .menu { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
 .menu-item { padding: 0.45rem 0.6rem; border-radius: var(--radio); text-decoration: none; color: var(--texto); }
 .menu-item.activo { background: var(--activo); font-weight: 600; }

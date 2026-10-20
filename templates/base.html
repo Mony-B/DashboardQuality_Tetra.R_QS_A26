@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}Dashboard SQA{% endblock %} · Dashboard SQA</title>
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block estilos %}{% endblock %}
 </head>
@@ -11,7 +12,9 @@
   {% if user.is_authenticated %}
   {% with app=request.resolver_match.app_name %}
   <aside class="lateral">
-    <a class="marca" href="{% url 'proyectos:mis_proyectos' %}">Dashboard SQA</a>
+    <a class="marca" href="{% url 'proyectos:mis_proyectos' %}">
+      <img src="{% static 'img/logo.png' %}" alt="QuaQlity" class="logo">
+    </a>
     <nav class="menu" aria-label="Principal">
       <a class="menu-item{% if app == 'proyectos' %} activo{% endif %}" href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a>
       {# Se vuelven enlaces conforme se agreguen los casos de uso #}
