@@ -4,15 +4,19 @@ from apps.proyectos.models import Periodo
 
 MSG_ENTERO = "Escribe un número entero, sin decimales."
 MSG_NEGATIVO = "El valor no puede ser negativo."
+MSG_OBLIGATORIO = "Este campo es obligatorio."
 
 
 def _conteo(etiqueta):
-    """Campo de conteo: entero mayor o igual a 0 y opcional (una medida vacía no es 0)."""
+    """Campo de conteo: obligatorio, entero mayor o igual a 0."""
     return forms.IntegerField(
         label=etiqueta,
-        required=False,
         min_value=0,
-        error_messages={"invalid": MSG_ENTERO, "min_value": MSG_NEGATIVO},
+        error_messages={
+            "required": MSG_OBLIGATORIO,
+            "invalid": MSG_ENTERO,
+            "min_value": MSG_NEGATIVO,
+        },
         widget=forms.NumberInput(attrs={"min": 0, "step": 1, "placeholder": "n"}),
     )
 
@@ -20,8 +24,7 @@ def _conteo(etiqueta):
 class MedidasPeriodoForm(forms.ModelForm):
     """Las ocho medidas del periodo (R5, R6).
 
-    Con un solo envío se guardan todas las medidas o ninguna. Cualquier medida
-    puede quedar vacía; vacía es distinto de 0.
+    Las ocho son obligatorias. Con un solo envío se guardan todas las medidas o ninguna.
     """
 
     funciones_requeridas = _conteo("Funciones requeridas del periodo")
@@ -33,10 +36,10 @@ class MedidasPeriodoForm(forms.ModelForm):
     defectos_codigo = _conteo("Defectos del código detectados")
     kloc = forms.DecimalField(
         label="Tamaño del código",
-        required=False,
         max_digits=8,
         decimal_places=3,
         error_messages={
+            "required": MSG_OBLIGATORIO,
             "invalid": "Escribe un número, por ejemplo 2.5.",
             "max_digits": "El KLOC es demasiado grande.",
             "max_decimal_places": "Usa como máximo 3 decimales.",
@@ -128,8 +131,8 @@ class MedidasPeriodoForm(forms.ModelForm):
         ]
 
     def clean_kloc(self):
-        kloc = self.cleaned_data.get("kloc")
-        if kloc is not None and kloc <= 0:
+        kloc = self.cleaned_data["kloc"]
+        if kloc <= 0:
             raise forms.ValidationError("El KLOC debe ser mayor que 0.")
         return kloc
 
