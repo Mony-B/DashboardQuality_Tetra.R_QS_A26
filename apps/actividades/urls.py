@@ -12,6 +12,7 @@ urlpatterns = [
         views.planear_actividad_view,
         name="nueva",
     ),
+    path("actividades/<int:actividad_id>/editar/", views.editar_actividad_view, name="editar"),
     path("actividades/<int:actividad_id>/estado/", views.cambiar_estado_view, name="estado"),
     path("actividades/<int:actividad_id>/enlace/", views.guardar_enlace_view, name="enlace"),
 ]

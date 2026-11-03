@@ -94,6 +94,29 @@ def planear_actividad_view(request, periodo_id):
     return redirect(actividad.get_absolute_url())
 
 
+def editar_actividad_view(request, actividad_id):
+    """Edita técnica, artefacto o CU, responsable y fecha de una actividad ya planeada.
+
+    El estado y el enlace a la evidencia no cambian aquí: tienen sus propias acciones.
+    """
+    actividad = _actividad_del_usuario(request, actividad_id)
+    if request.method == "POST":
+        form = ActividadForm(request.POST, instance=actividad)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Actividad actualizada.")
+            return redirect(actividad.get_absolute_url())
+    else:
+        form = ActividadForm(instance=actividad)
+    contexto = {
+        "actividad": actividad,
+        "periodo": actividad.periodo,
+        "proyecto": actividad.periodo.proyecto,
+        "form": form,
+    }
+    return render(request, "actividades/editar_actividad.html", contexto)
+
+
 @require_POST
 def cambiar_estado_view(request, actividad_id):
     """Pasos 8 y 9: guarda el nuevo estado, en cualquier dirección (FA-4); el enlace se conserva."""

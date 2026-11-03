@@ -75,6 +75,7 @@
           <th scope="col">Fecha</th>
           <th scope="col">Estado</th>
           <th scope="col">Enlace a la evidencia</th>
+          <th scope="col">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -114,6 +115,7 @@
               {% endif %}
             </form>
           </td>
+          <td><a class="boton boton-secundario boton-chico" href="{% url 'actividades:editar' actividad.pk %}">Editar</a></td>
         </tr>
         {% endfor %}
       </tbody>
