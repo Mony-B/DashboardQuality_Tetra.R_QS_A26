@@ -209,7 +209,7 @@ class EstadoTests(BaseTests):
     def test_cambia_a_en_curso_y_muestra_el_mensaje(self):
         actividad = self.crear()
         respuesta = self.cambiar(actividad, "en_curso")
-        self.assertRedirects(respuesta, self.url_lista)
+        self.assertRedirects(respuesta, self.url_lista, fetch_redirect_response=False)
         actividad.refresh_from_db()
         self.assertEqual(actividad.estado, "en_curso")
         self.assertContains(self.client.get(self.url_lista), "Estado actualizado a «en curso».")
@@ -231,7 +231,7 @@ class EstadoTests(BaseTests):
     def test_estado_invalido_no_cambia_nada(self):
         actividad = self.crear()
         respuesta = self.cambiar(actividad, "terminada")
-        self.assertRedirects(respuesta, self.url_lista)
+        self.assertRedirects(respuesta, self.url_lista, fetch_redirect_response=False)
         actividad.refresh_from_db()
         self.assertEqual(actividad.estado, "planeada")
         self.assertContains(self.client.get(self.url_lista), "Elige un estado válido.")
@@ -248,7 +248,7 @@ class EnlaceTests(BaseTests):
     def test_guarda_un_enlace_https_y_muestra_el_mensaje(self):
         actividad = self.crear()
         respuesta = self.guardar(actividad, ENLACE)
-        self.assertRedirects(respuesta, self.url_lista)
+        self.assertRedirects(respuesta, self.url_lista, fetch_redirect_response=False)
         actividad.refresh_from_db()
         self.assertEqual(actividad.enlace_evidencia, ENLACE)
         self.assertContains(self.client.get(self.url_lista), "Enlace de evidencia guardado.")
@@ -301,7 +301,7 @@ class EnlaceTests(BaseTests):
     def test_campo_vacio_quita_el_enlace_y_conserva_el_estado(self):
         actividad = self.crear(estado="completada", enlace_evidencia=ENLACE)
         respuesta = self.guardar(actividad, "")
-        self.assertRedirects(respuesta, self.url_lista)
+        self.assertRedirects(respuesta, self.url_lista, fetch_redirect_response=False)
         actividad.refresh_from_db()
         self.assertEqual(actividad.enlace_evidencia, "")
         self.assertEqual(actividad.estado, "completada")
