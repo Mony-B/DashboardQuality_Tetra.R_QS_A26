@@ -1,5 +1,5 @@
 /* CU 03 · Actividades SQA: selectores de proyecto y periodo, cambio de estado inmediato
-   el aviso de que una actividad planeada no se edita y la confirmación al cancelar (FE-1). Sin JavaScript, el estado se guarda
+   y confirmación al cancelar la planeación (FE-1). Sin JavaScript, el estado se guarda
    con el botón "Guardar" de cada fila y "Cancelar" vuelve a cargar la pantalla. */
 (function () {
   "use strict";
@@ -42,26 +42,6 @@
   document.querySelectorAll(".form-estado select").forEach(function (sel) {
     sel.addEventListener("change", function () { sel.form.submit(); });
   });
-
-  // Aviso: una actividad planeada ya no se puede editar. Se pide confirmar antes de registrarla.
-  var formPlanear = document.getElementById("form-actividad");
-  var avisoPlanear = document.getElementById("confirmar-planear");
-  if (formPlanear && avisoPlanear && typeof avisoPlanear.showModal === "function") {
-    var confirmado = false;
-    formPlanear.addEventListener("submit", function (evento) {
-      if (confirmado) return;
-      evento.preventDefault();
-      avisoPlanear.showModal();
-    });
-    avisoPlanear.querySelector("[data-accion=revisar]").addEventListener("click", function () {
-      avisoPlanear.close();
-    });
-    avisoPlanear.querySelector("[data-accion=planear]").addEventListener("click", function () {
-      confirmado = true;
-      avisoPlanear.close();
-      formPlanear.submit();
-    });
-  }
 
   // FE-1: si ya eligió o capturó algún dato, pide confirmación antes de vaciar el formulario.
   var form = document.getElementById("form-actividad");

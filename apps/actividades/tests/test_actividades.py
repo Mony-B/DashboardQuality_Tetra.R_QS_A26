@@ -112,11 +112,14 @@ class PantallaTests(BaseTests):
         self.assertNotContains(respuesta, "<script>alert(1)</script>")
         self.assertContains(respuesta, "&lt;script&gt;alert(1)&lt;/script&gt;")
 
-    def test_avisa_antes_de_planear_que_la_actividad_no_se_podra_editar(self):
+    def test_la_pantalla_advierte_que_la_actividad_planeada_no_se_podra_modificar(self):
         respuesta = self.client.get(self.url_lista)
-        self.assertContains(respuesta, "no se podrá editar ni eliminar")
-        self.assertContains(respuesta, "Sí, planear")
-        self.assertContains(respuesta, "Revisar datos")
+        self.assertContains(respuesta, "una vez planeada, la actividad ya no se podrá modificar")
+
+    def test_la_advertencia_no_es_una_ventana_emergente(self):
+        respuesta = self.client.get(self.url_lista)
+        self.assertNotContains(respuesta, "confirmar-planear")
+        self.assertNotContains(respuesta, "Sí, planear")
 
     def test_no_existe_edicion_de_actividades(self):
         actividad = self.crear()

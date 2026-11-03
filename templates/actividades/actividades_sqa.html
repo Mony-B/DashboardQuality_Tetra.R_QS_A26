@@ -56,6 +56,7 @@
       {% for error in form.fecha.errors %}<p class="error">{{ error }}</p>{% empty %}<small class="ayuda">Elige la fecha en el calendario</small>{% endfor %}
     </div>
   </div>
+  <p class="aviso" role="note"><strong>Importante:</strong> una vez planeada, la actividad ya no se podrá modificar. Solo podrás cambiar su estado y su enlace a la evidencia.</p>
   <div class="acciones">
     <button type="submit" class="boton">Planear actividad</button>
     <a class="boton boton-secundario" id="cancelar" href="{{ periodo.get_absolute_url_actividades }}">Cancelar</a>
@@ -123,16 +124,6 @@
   <p class="nota vacio-actividades">Este periodo todavía no tiene actividades. Planea la primera con el formulario de arriba.</p>
   {% endif %}
 </section>
-
-{# Aviso antes de planear: la actividad registrada ya no se puede editar #}
-<dialog id="confirmar-planear" class="dialogo" aria-labelledby="titulo-planear">
-  <h2 id="titulo-planear">¿Planear la actividad?</h2>
-  <p>Una vez planeada, la actividad no se podrá editar ni eliminar. Solo podrás cambiar su estado y su enlace de evidencia. ¿Deseas continuar?</p>
-  <div class="acciones acciones-derecha">
-    <button type="button" class="boton boton-secundario" data-accion="revisar">Revisar datos</button>
-    <button type="button" class="boton" data-accion="planear">Sí, planear</button>
-  </div>
-</dialog>
 
 {# FE-1: confirmación al cancelar con datos capturados #}
 <dialog id="confirmar-cancelar" class="dialogo" aria-labelledby="titulo-cancelar">

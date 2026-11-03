@@ -23,3 +23,5 @@ thead + tbody tr:first-child td { border-top: 0; }
 
 .dialogo h2 { margin-top: 0; }
 .dialogo .acciones { margin-top: 1rem; }
+
+.aviso { margin: 1rem 0 0; padding: 0.6rem 0.8rem; border: 1px solid var(--borde); border-left: 4px solid var(--advertencia, #b7791f); border-radius: var(--radio); font-size: 0.9rem; color: var(--texto-suave); }
