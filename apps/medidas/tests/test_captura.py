@@ -157,19 +157,6 @@ class GuardarTests(BaseCapturaTests):
             self.enviar(casos_aprobados="50")
         recalcular.assert_not_called()
 
-    def test_medidas_incompletas_se_guardan_y_lo_vacio_queda_sin_dato(self):
-        """FA-2: una medida vacía no es 0."""
-        respuesta = self.enviar(kloc="", defectos_codigo="")
-        self.assertRedirects(respuesta, self.url)
-        self.periodo.refresh_from_db()
-        self.assertIsNone(self.periodo.kloc)
-        self.assertIsNone(self.periodo.defectos_codigo)
-        self.assertEqual(self.periodo.funciones_requeridas, 10)
-
-    def test_guardar_con_todo_vacio_es_valido(self):
-        datos = {nombre: "" for nombre in MEDIDAS_VALIDAS}
-        self.assertRedirects(self.client.post(self.url, datos), self.url)
-
     def test_corregir_reemplaza_el_conjunto_anterior(self):
         """FA-3: se guarda un único conjunto de medidas por periodo."""
         self.enviar(funciones_requeridas="10", funciones_entregadas="4")
@@ -205,6 +192,32 @@ class ValidacionTests(BaseCapturaTests):
         self.periodo.refresh_from_db()
         self.assertIsNone(self.periodo.funciones_requeridas)
         return respuesta
+
+    def test_cada_medida_vacia_se_rechaza(self):
+        """Las ocho medidas son obligatorias; las demás no se guardan."""
+        for campo in MEDIDAS_VALIDAS:
+            with self.subTest(campo=campo):
+                respuesta = self.enviar(**{campo: ""})
+                self.assertEqual(respuesta.status_code, 200)
+                self.assertEqual(
+                    respuesta.context["form"].errors[campo], ["Este campo es obligatorio."]
+                )
+                self.assertContains(respuesta, "Este campo es obligatorio.")
+                self.periodo.refresh_from_db()
+                self.assertFalse(self.periodo.tiene_medidas())
+
+    def test_todo_vacio_marca_las_ocho_medidas(self):
+        datos = {nombre: "" for nombre in MEDIDAS_VALIDAS}
+        respuesta = self.client.post(self.url, datos)
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(set(respuesta.context["form"].errors), set(MEDIDAS_VALIDAS))
+
+    def test_una_medida_vacia_no_cambia_lo_guardado(self):
+        self.enviar()
+        self.enviar(funciones_entregadas="1", kloc="")
+        self.periodo.refresh_from_db()
+        self.assertEqual(self.periodo.funciones_entregadas, 8)
+        self.assertEqual(self.periodo.kloc, Decimal("3.2"))
 
     def test_conteo_negativo(self):
         self.verificar_rechazo(
