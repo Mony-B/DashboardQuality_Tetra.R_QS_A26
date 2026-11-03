@@ -17,7 +17,7 @@ class RegistroTests(TestCase):
 
     def test_crear_cuenta_inicia_sesion_y_redirige(self):
         respuesta = self._registrar()
-        self.assertRedirects(respuesta, reverse("core:inicio"))
+        self.assertRedirects(respuesta, reverse("proyectos:mis_proyectos"))
         self.assertTrue(Usuario.objects.filter(username="ana").exists())
 
     def test_correo_repetido_se_rechaza(self):
@@ -45,7 +45,7 @@ class SesionTests(TestCase):
         respuesta = self.client.post(
             reverse("cuentas:iniciar_sesion"), {"username": "ana", "password": CLAVE}
         )
-        self.assertRedirects(respuesta, reverse("core:inicio"))
+        self.assertRedirects(respuesta, reverse("proyectos:mis_proyectos"))
 
     def test_contrasena_incorrecta_no_entra(self):
         respuesta = self.client.post(

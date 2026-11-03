@@ -4,17 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}Dashboard SQA{% endblock %} · Dashboard SQA</title>
+  <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block estilos %}{% endblock %}
 </head>
-<body>
+<body class="{% if user.is_authenticated %}con-menu{% endif %}">
   {% if user.is_authenticated %}
-  <header class="barra">
-    <a class="marca" href="{% url 'core:inicio' %}">Dashboard SQA</a>
-    <nav class="menu">
-      {# Se activan conforme se agreguen las apps de cada caso de uso #}
-      <a class="menu-item{% if menu_activo == 'proyectos' %} activo{% endif %}" href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a>
-      <a class="menu-item{% if menu_activo == 'medidas' %} activo{% endif %}" href="{% url 'medidas:inicio' %}">Captura de medidas</a>
+  {% with app=request.resolver_match.app_name %}
+  <aside class="lateral">
+    <a class="marca" href="{% url 'proyectos:mis_proyectos' %}">
+      <img src="{% static 'img/logo.png' %}" alt="QuaQlity" class="logo" style="display:block;width:100%;max-width:10rem;height:auto">
+    </a>
+    <nav class="menu" aria-label="Principal">
+      <a class="menu-item{% if app == 'proyectos' %} activo{% endif %}" href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a>
+      <a class="menu-item{% if app == 'medidas' %} activo{% endif %}" href="{% url 'medidas:inicio' %}">Captura de medidas</a>
+      {# Se vuelven enlaces conforme se agreguen los casos de uso #}
       <span class="menu-item pendiente" title="CU 03">Actividades SQA</span>
       <span class="menu-item pendiente" title="CU 04">Dashboard</span>
       <span class="menu-item pendiente" title="CU 05">Reportes</span>
@@ -22,22 +26,22 @@
     <form method="post" action="{% url 'cuentas:cerrar_sesion' %}" class="salir">
       {% csrf_token %}
       <span class="usuario">{{ user.username }}</span>
-      <button type="submit" class="boton boton-secundario">Cerrar sesión</button>
+      <button type="submit" class="enlace-boton">Cerrar sesión</button>
     </form>
-  </header>
+  </aside>
+  {% endwith %}
   {% endif %}
 
   <main class="contenido">
-    {% block mensajes %}
     {% if messages %}
     <ul class="mensajes">
       {% for message in messages %}
-      <li class="mensaje mensaje-{{ message.tags }}">{{ message }}</li>
+      <li class="mensaje mensaje-{{ message.tags }}" role="status">{{ message }}</li>
       {% endfor %}
     </ul>
     {% endif %}
-    {% endblock %}
 
+    {% block migas %}{% endblock %}
     {% block contenido %}{% endblock %}
   </main>
 

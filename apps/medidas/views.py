@@ -71,20 +71,18 @@ class CapturaMedidasView(PropietarioMixin, UpdateView):
                         "etiqueta": p.etiqueta,
                         "url": p.get_absolute_url_medidas(),
                     }
-                    for p in proyecto.periodos.all()
+                    for p in sorted(
+                        proyecto.periodos.all(), key=lambda x: x.fecha_inicio, reverse=True
+                    )
                 ],
             }
             for proyecto in proyectos
         ]
         contexto.update(
-            menu_activo="medidas",
             proyecto=periodo.proyecto,
             periodo=periodo,
             bloques=contexto["form"].bloques(),
             tenia_medidas=self.tenia_medidas,
-            recien_guardado=any(
-                mensaje.level == messages.SUCCESS for mensaje in messages.get_messages(self.request)
-            ),
             selector=selector,
             url_mis_proyectos=reverse("proyectos:mis_proyectos"),
         )

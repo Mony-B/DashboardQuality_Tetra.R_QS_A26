@@ -2,7 +2,7 @@ from django.apps import AppConfig
 
 
 class ProyectosConfig(AppConfig):
-    """Proyectos y periodos (CU 01). Aquí viven también las medidas de cada periodo (CU 02)."""
+    """CU 01 · Iniciar el monitoreo de un proyecto (R2, R3, R4)."""
 
     name = "apps.proyectos"
     label = "proyectos"

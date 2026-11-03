@@ -119,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_URL = "cuentas:iniciar_sesion"
-LOGIN_REDIRECT_URL = "core:inicio"
+LOGIN_REDIRECT_URL = "proyectos:mis_proyectos"
 LOGOUT_REDIRECT_URL = "cuentas:iniciar_sesion"
 
 # ---------------------------------------------------------------------------

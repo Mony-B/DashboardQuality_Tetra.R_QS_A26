@@ -19,11 +19,11 @@ class SesionRequeridaTests(TestCase):
         url_login = reverse("cuentas:iniciar_sesion")
         self.assertRedirects(respuesta, f"{url_login}?next=/")
 
-    def test_inicio_con_sesion_responde_200(self):
+    def test_inicio_con_sesion_lleva_a_mis_proyectos(self):
         usuario = Usuario.objects.create_user("ana", "ana@ejemplo.com", "Clave-segura-123")
         self.client.force_login(usuario)
         respuesta = self.client.get(reverse("core:inicio"))
-        self.assertEqual(respuesta.status_code, 200)
+        self.assertRedirects(respuesta, reverse("proyectos:mis_proyectos"))
 
 
 class PropietarioMixinTests(TestCase):

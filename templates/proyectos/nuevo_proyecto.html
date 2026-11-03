@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}{% if proyecto %}Nuevo periodo · {{ proyecto.nombre }}{% else %}Nuevo proyecto{% endif %}{% endblock %}
+
+{% block migas %}
+<nav class="migas" aria-label="Ruta">
+  <a href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a> ›
+  {% if proyecto %}{{ proyecto.nombre }} › Nuevo periodo{% else %}Nuevo proyecto{% endif %}
+</nav>
+{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Nuevo proyecto / nuevo periodo</h1>
+    <p class="nota">
+      {% if proyecto %}
+        Nuevo periodo en un proyecto existente. Los datos del proyecto son de solo lectura.
+      {% else %}
+        Registra el proyecto y su primer periodo. Al guardar pasas a capturar las medidas del periodo.
+      {% endif %}
+    </p>
+  </div>
+</header>
+
+{% if form.errors %}
+<p class="aviso aviso-error" role="alert">No se guardó. Revisa los campos marcados; lo que capturaste se conserva.</p>
+{% endif %}
+
+{% with secciones=form.secciones %}
+<form method="post" class="tarjeta formulario" id="form-proyecto" novalidate>
+  {% csrf_token %}
+
+  <fieldset>
+    <legend>{% if proyecto %}Proyecto (solo lectura){% else %}Proyecto{% endif %}</legend>
+    <div class="rejilla">
+      {% for campo in secciones.0 %}
+        <div class="{% if campo.name == 'descripcion' %}ancho-completo{% endif %}">
+          {% include "includes/campo.html" with campo=campo %}
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if proyecto %}
+    <p class="etiqueta">Periodos registrados</p>
+    <ul class="lista-periodos">
+      {% for p in periodos %}
+      <li><span class="dato">{{ p.nombre }}</span><span class="dato">{{ p.fecha_inicio|date:"d/m/Y" }} – {{ p.fecha_fin|date:"d/m/Y" }}</span></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </fieldset>
+
+  <fieldset>
+    <legend>{% if proyecto %}Periodo nuevo{% else %}Primer periodo{% endif %}</legend>
+    <div class="rejilla">
+      {% for campo in secciones.1 %}
+        <div>{% include "includes/campo.html" with campo=campo %}</div>
+        {% if campo.name == "nombre_periodo" %}<div></div>{% endif %}
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <div class="acciones">
+    <button type="submit" class="boton">Guardar y capturar medidas</button>
+    <a class="boton boton-secundario" id="cancelar" href="{% url 'proyectos:mis_proyectos' %}">Cancelar</a>
+  </div>
+</form>
+{% endwith %}
+
+{# FE-1: confirmación al cancelar con datos capturados #}
+<dialog id="confirmar-cancelar" class="dialogo" aria-labelledby="titulo-cancelar">
+  <h2 id="titulo-cancelar">¿Cancelar el registro?</h2>
+  <p>Se perderán los datos capturados. ¿Deseas cancelar el registro?</p>
+  <div class="acciones acciones-derecha">
+    <button type="button" class="boton boton-secundario" data-accion="seguir">Seguir capturando</button>
+    <a class="boton" href="{% url 'proyectos:mis_proyectos' %}">Sí, cancelar</a>
+  </div>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/cancelar.js' %}" defer></script>
+{% endblock %}

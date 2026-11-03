@@ -1,11 +1,7 @@
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView
 
 
-class InicioView(TemplateView):
-    """Pantalla de inicio tras iniciar sesión.
+class InicioView(RedirectView):
+    """La pantalla de inicio es Mis proyectos (precondición 2 del CU 01)."""
 
-    Provisional: cuando exista la app de proyectos (CU 01), esta ruta
-    redirigirá a Mis proyectos.
-    """
-
-    template_name = "core/inicio.html"
+    pattern_name = "proyectos:mis_proyectos"
