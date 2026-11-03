@@ -466,4 +466,5 @@ class EditarTests(BaseTests):
         self.assertContains(respuesta, "Máximo 80 caracteres.")
 
     def test_el_formulario_lleva_proteccion_csrf(self):
-        self.assertContains(self.client.get(self.url), "csrfmiddlewaretoken", count=1)
+        # Uno es el de "Cerrar sesión" del menú lateral y el otro el de este formulario.
+        self.assertContains(self.client.get(self.url), "csrfmiddlewaretoken", count=2)
