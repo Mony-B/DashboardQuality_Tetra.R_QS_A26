@@ -1,0 +1,25 @@
+/* CU 03 · Actividades SQA (usa las variables y piezas de base.css) */
+.subtitulo { max-width: 52rem; }
+.selectores { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.selectores .campo { min-width: 16rem; margin-bottom: 0.5rem; }
+.resumen-periodo { margin: 0 0 1rem; font-size: 0.9rem; }
+
+.titulo-seccion { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 0.75rem; }
+.tabla-actividades { margin-top: 1.25rem; padding: 1rem 0 0; }
+.tabla-actividades .titulo-seccion { padding: 0 1rem; }
+.tabla-desplazable { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th { text-align: left; font-weight: 500; font-size: 0.8rem; color: var(--texto-suave); padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+td { font-size: 0.9rem; padding: 0.7rem 0.75rem; border-top: 1px solid var(--borde); vertical-align: top; }
+thead + tbody tr:first-child td { border-top: 0; }
+.form-estado, .form-enlace { margin: 0; }
+.form-estado select, .fila-enlace input { height: 2.25rem; border: 1px solid var(--borde); border-radius: var(--radio); padding: 0 0.5rem; font: inherit; background: var(--superficie); }
+.fila-enlace { display: flex; gap: 0.4rem; align-items: center; }
+.fila-enlace input { min-width: 15rem; flex: 1; }
+.campo-error .fila-enlace input { border-color: var(--error); }
+.form-enlace .campo { margin: 0; }
+.boton-chico { padding: 0.35rem 0.75rem; font-size: 0.85rem; }
+.vacio-actividades { padding: 1rem 1rem 1.25rem; }
+
+.dialogo h2 { margin-top: 0; }
+.dialogo .acciones { margin-top: 1rem; }

@@ -31,8 +31,8 @@ Cada caso de uso vive en su propia app dentro de `apps/`:
 | App | Caso de uso | Requisitos | Estado |
 |---|---|---|---|
 | `proyectos` | CU 01 · Iniciar el monitoreo de un proyecto | R2–R4 | Implementado |
-| `medidas` | CU 02 · Registrar las medidas del periodo | R5–R7 | Solo la pantalla de destino del CU 01 |
-| `actividades` | CU 03 · Planear y dar seguimiento a las actividades SQA | R8–R9 | Pendiente |
+| `medidas` | CU 02 · Registrar las medidas del periodo | R5–R7 | Implementado (guarda las medidas en `Periodo`) |
+| `actividades` | CU 03 · Planear y dar seguimiento a las actividades SQA | R8–R9 | Implementado |
 | `tablero` | CU 04 · Evaluar la salud del proyecto | R10–R18 | Pendiente |
 | `reportes` | CU 05 · Generar el reporte de salud | R19 | Pendiente |
 

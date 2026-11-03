@@ -95,6 +95,9 @@ class Periodo(models.Model):
             "medidas:captura", kwargs={"proyecto_id": self.proyecto_id, "periodo_id": self.pk}
         )
 
+    def get_absolute_url_actividades(self):
+        return reverse("actividades:lista", kwargs={"periodo_id": self.pk})
+
     def tiene_medidas(self):
         """True si el periodo ya tiene al menos una medida capturada."""
         return any(

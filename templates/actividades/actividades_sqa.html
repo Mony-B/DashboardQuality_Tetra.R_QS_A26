@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Actividades SQA{% endblock %}
+
+{% block estilos %}<link rel="stylesheet" href="{% static 'css/actividades.css' %}">{% endblock %}
+
+{% block migas %}
+<nav class="migas" aria-label="Ruta">
+  <a href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a> › {{ proyecto.nombre }}
+</nav>
+{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Actividades SQA</h1>
+    <p class="nota subtitulo">Planea las técnicas de aseguramiento de calidad del periodo y registra su estado y su evidencia. No forman parte del índice de salud.</p>
+  </div>
+</header>
+
+<div class="selectores">
+  <div class="campo">
+    <label for="selector-proyecto">Proyecto</label>
+    <select id="selector-proyecto" data-actual="{{ proyecto.pk }}"></select>
+  </div>
+  <div class="campo">
+    <label for="selector-periodo">Periodo</label>
+    <select id="selector-periodo" data-actual="{{ periodo.pk }}"></select>
+  </div>
+</div>
+<p class="nota resumen-periodo">{{ proyecto.nombre }} · {{ periodo.etiqueta }}</p>
+
+<form method="post" action="{% url 'actividades:nueva' periodo.pk %}" id="form-actividad" class="tarjeta formulario" novalidate>
+  {% csrf_token %}
+  <h2 class="titulo-seccion">Planear una actividad</h2>
+  <div class="rejilla">
+    <div class="campo{% if form.tecnica.errors %} campo-error{% endif %}">
+      <label for="{{ form.tecnica.id_for_label }}">{{ form.tecnica.label }}</label>
+      {{ form.tecnica }}
+      {% for error in form.tecnica.errors %}<p class="error">{{ error }}</p>{% empty %}<small class="ayuda">Catálogo de seis técnicas</small>{% endfor %}
+    </div>
+    <div class="campo{% if form.artefacto.errors %} campo-error{% endif %}">
+      <label for="{{ form.artefacto.id_for_label }}">{{ form.artefacto.label }}</label>
+      {{ form.artefacto }}
+      {% for error in form.artefacto.errors %}<p class="error">{{ error }}</p>{% empty %}<small class="ayuda">Máximo 120 caracteres</small>{% endfor %}
+    </div>
+    <div class="campo{% if form.responsable.errors %} campo-error{% endif %}">
+      <label for="{{ form.responsable.id_for_label }}">{{ form.responsable.label }}</label>
+      {{ form.responsable }}
+      {% for error in form.responsable.errors %}<p class="error">{{ error }}</p>{% empty %}<small class="ayuda">Máximo 80 caracteres</small>{% endfor %}
+    </div>
+    <div class="campo{% if form.fecha.errors %} campo-error{% endif %}">
+      <label for="{{ form.fecha.id_for_label }}">{{ form.fecha.label }}</label>
+      {{ form.fecha }}
+      {% for error in form.fecha.errors %}<p class="error">{{ error }}</p>{% empty %}<small class="ayuda">Elige la fecha en el calendario</small>{% endfor %}
+    </div>
+  </div>
+  <div class="acciones">
+    <button type="submit" class="boton">Planear actividad</button>
+    <a class="boton boton-secundario" id="cancelar" href="{{ periodo.get_absolute_url_actividades }}">Cancelar</a>
+  </div>
+</form>
+
+<section class="tarjeta tabla-actividades" aria-labelledby="titulo-tabla">
+  <h2 class="titulo-seccion" id="titulo-tabla">Actividades del periodo {{ periodo.nombre }}</h2>
+  {% if actividades %}
+  <div class="tabla-desplazable">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Técnica</th>
+          <th scope="col">Artefacto o CU</th>
+          <th scope="col">Responsable</th>
+          <th scope="col">Fecha</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Enlace a la evidencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for actividad in actividades %}
+        <tr>
+          <td>{{ actividad.get_tecnica_display }}</td>
+          <td>{{ actividad.artefacto }}</td>
+          <td>{{ actividad.responsable }}</td>
+          <td>{{ actividad.fecha|date:"d/m/Y" }}</td>
+          <td>
+            <form method="post" action="{% url 'actividades:estado' actividad.pk %}" class="form-estado">
+              {% csrf_token %}
+              <select name="estado" aria-label="Estado de {{ actividad.get_tecnica_display }} · {{ actividad.artefacto }}">
+                {% for valor, nombre in estados %}
+                <option value="{{ valor }}"{% if valor == actividad.estado %} selected{% endif %}>{{ nombre }}</option>
+                {% endfor %}
+              </select>
+              <noscript><button type="submit" class="boton boton-secundario boton-chico">Guardar</button></noscript>
+            </form>
+          </td>
+          <td>
+            <form method="post" action="{% url 'actividades:enlace' actividad.pk %}" class="form-enlace">
+              {% csrf_token %}
+              {% if error_enlace and error_enlace.0 == actividad.pk %}
+              <div class="campo campo-error">
+                <div class="fila-enlace">
+                  <input type="text" name="enlace" value="{{ error_enlace.1 }}" placeholder="https://…" maxlength="500" aria-label="Enlace a la evidencia" aria-invalid="true">
+                  <button type="submit" class="boton boton-secundario boton-chico">Guardar</button>
+                </div>
+                <p class="error" role="alert">{{ error_enlace.2 }}</p>
+              </div>
+              {% else %}
+              <div class="fila-enlace">
+                <input type="text" name="enlace" value="{{ actividad.enlace_evidencia }}" placeholder="https://…" maxlength="500" aria-label="Enlace a la evidencia">
+                <button type="submit" class="boton boton-secundario boton-chico">Guardar</button>
+              </div>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="nota vacio-actividades">Este periodo todavía no tiene actividades. Planea la primera con el formulario de arriba.</p>
+  {% endif %}
+</section>
+
+{# FE-1: confirmación al cancelar con datos capturados #}
+<dialog id="confirmar-cancelar" class="dialogo" aria-labelledby="titulo-cancelar">
+  <h2 id="titulo-cancelar">¿Cancelar la planeación?</h2>
+  <p>Se perderán los datos capturados. ¿Deseas cancelar?</p>
+  <div class="acciones acciones-derecha">
+    <button type="button" class="boton boton-secundario" data-accion="seguir">Seguir capturando</button>
+    <button type="button" class="boton" data-accion="confirmar">Sí, cancelar</button>
+  </div>
+</dialog>
+
+{{ selector|json_script:"datos-selector" }}
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'js/actividades.js' %}" defer></script>{% endblock %}

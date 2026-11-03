@@ -18,8 +18,8 @@
     <nav class="menu" aria-label="Principal">
       <a class="menu-item{% if app == 'proyectos' %} activo{% endif %}" href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a>
       <a class="menu-item{% if app == 'medidas' %} activo{% endif %}" href="{% url 'medidas:inicio' %}">Captura de medidas</a>
+      <a class="menu-item{% if app == 'actividades' %} activo{% endif %}" href="{% url 'actividades:inicio' %}">Actividades SQA</a>
       {# Se vuelven enlaces conforme se agreguen los casos de uso #}
-      <span class="menu-item pendiente" title="CU 03">Actividades SQA</span>
       <span class="menu-item pendiente" title="CU 04">Dashboard</span>
       <span class="menu-item pendiente" title="CU 05">Reportes</span>
     </nav>
