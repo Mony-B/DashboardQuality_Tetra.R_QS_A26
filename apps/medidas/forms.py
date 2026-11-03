@@ -18,7 +18,7 @@ def _conteo(etiqueta):
 
 
 class MedidasPeriodoForm(forms.ModelForm):
-    """Las ocho medidas del periodo y la marca de defecto crítico abierto (R5, R6).
+    """Las ocho medidas del periodo (R5, R6).
 
     Con un solo envío se guardan todas las medidas o ninguna. Cualquier medida
     puede quedar vacía; vacía es distinto de 0.
@@ -43,9 +43,6 @@ class MedidasPeriodoForm(forms.ModelForm):
             "max_whole_digits": "El KLOC es demasiado grande.",
         },
         widget=forms.NumberInput(attrs={"min": 0, "step": "any", "placeholder": "n"}),
-    )
-    defecto_critico_abierto = forms.BooleanField(
-        label="Existe un defecto crítico abierto", required=False
     )
 
     # Cada numerador no puede ser mayor que su total: (numerador, total, mensaje).
@@ -118,7 +115,6 @@ class MedidasPeriodoForm(forms.ModelForm):
             "requisitos_con_prueba",
             "defectos_codigo",
             "kloc",
-            "defecto_critico_abierto",
         )
 
     def bloques(self):
