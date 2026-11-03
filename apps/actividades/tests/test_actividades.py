@@ -112,6 +112,19 @@ class PantallaTests(BaseTests):
         self.assertNotContains(respuesta, "<script>alert(1)</script>")
         self.assertContains(respuesta, "&lt;script&gt;alert(1)&lt;/script&gt;")
 
+    def test_avisa_antes_de_planear_que_la_actividad_no_se_podra_editar(self):
+        respuesta = self.client.get(self.url_lista)
+        self.assertContains(respuesta, "no se podrá editar ni eliminar")
+        self.assertContains(respuesta, "Sí, planear")
+        self.assertContains(respuesta, "Revisar datos")
+
+    def test_no_existe_edicion_de_actividades(self):
+        actividad = self.crear()
+        self.assertNotContains(self.client.get(self.url_lista), "Editar")
+        self.assertEqual(
+            self.client.post(f"/actividades/{actividad.pk}/editar/", DATOS).status_code, 404
+        )
+
     def test_el_menu_abre_el_periodo_actual(self):
         self.assertRedirects(self.client.get(reverse("actividades:inicio")), self.url_lista)
 
@@ -332,7 +345,6 @@ class AccesoTests(BaseTests):
             "nueva": self.url_nueva,
             "estado": reverse("actividades:estado", args=[self.actividad.pk]),
             "enlace": reverse("actividades:enlace", args=[self.actividad.pk]),
-            "editar": reverse("actividades:editar", args=[self.actividad.pk]),
         }
 
     def test_sin_sesion_pide_iniciar_sesion(self):
@@ -366,15 +378,6 @@ class AccesoTests(BaseTests):
             with self.subTest(nombre=nombre):
                 self.assertEqual(self.client.get(urls[nombre]).status_code, 405)
 
-    def test_actividad_ajena_responde_404_al_editar(self):
-        self.client.force_login(self.beto)
-        url = self.urls()["editar"]
-        self.assertEqual(self.client.get(url).status_code, 404)
-        self.assertEqual(self.client.post(url, DATOS).status_code, 404)
-        self.actividad.refresh_from_db()
-        self.assertEqual(self.actividad.artefacto, "CU 01")
-        self.assertEqual(self.actividad.responsable, "Integrante 1")
-
     def test_los_formularios_llevan_proteccion_csrf(self):
         respuesta = self.client.get(self.url_lista)
         self.assertContains(respuesta, "csrfmiddlewaretoken", count=4)
@@ -391,80 +394,3 @@ class ModeloTests(BaseTests):
         self.crear()
         self.periodo.delete()
         self.assertEqual(Actividad.objects.count(), 0)
-
-
-class EditarTests(BaseTests):
-    """Edición de una actividad ya planeada (técnica, artefacto o CU, responsable y fecha)."""
-
-    def setUp(self):
-        super().setUp()
-        self.actividad = self.crear(estado="en_curso", enlace_evidencia=ENLACE)
-        self.url = reverse("actividades:editar", args=[self.actividad.pk])
-
-    def editar(self, **cambios):
-        return self.client.post(self.url, {**DATOS, **cambios})
-
-    def test_la_tabla_ofrece_editar_cada_actividad(self):
-        respuesta = self.client.get(self.url_lista)
-        self.assertContains(respuesta, self.url)
-        self.assertContains(respuesta, "Editar")
-
-    def test_la_pantalla_muestra_los_datos_actuales(self):
-        respuesta = self.client.get(self.url)
-        self.assertEqual(respuesta.status_code, 200)
-        self.assertContains(respuesta, 'value="CU 01"')
-        self.assertContains(respuesta, 'value="Integrante 1"')
-        self.assertContains(respuesta, 'value="2026-12-14"')
-
-    def test_guarda_los_cambios_y_vuelve_a_la_lista(self):
-        respuesta = self.editar(artefacto="CU 02", responsable="Integrante 3")
-        self.assertRedirects(respuesta, self.url_lista, fetch_redirect_response=False)
-        self.actividad.refresh_from_db()
-        self.assertEqual(self.actividad.tecnica, "revision_pares")
-        self.assertEqual(self.actividad.artefacto, "CU 02")
-        self.assertEqual(self.actividad.responsable, "Integrante 3")
-        self.assertEqual(self.actividad.fecha, date(2026, 12, 16))
-
-    def test_muestra_el_mensaje_de_confirmacion(self):
-        respuesta = self.client.post(self.url, DATOS, follow=True)
-        self.assertContains(respuesta, "Actividad actualizada.")
-
-    def test_conserva_el_estado_y_el_enlace(self):
-        self.editar(artefacto="CU 02")
-        self.actividad.refresh_from_db()
-        self.assertEqual(self.actividad.estado, "en_curso")
-        self.assertEqual(self.actividad.enlace_evidencia, ENLACE)
-
-    def test_no_crea_otra_actividad(self):
-        self.editar(artefacto="CU 02")
-        self.assertEqual(Actividad.objects.count(), 1)
-
-    def test_un_campo_vacio_no_guarda_y_muestra_el_mensaje(self):
-        respuesta = self.editar(artefacto="")
-        self.assertEqual(respuesta.status_code, 200)
-        self.assertContains(respuesta, "Escribe el artefacto o caso de uso.")
-        self.actividad.refresh_from_db()
-        self.assertEqual(self.actividad.artefacto, "CU 01")
-
-    def test_conserva_lo_escrito_al_rechazar(self):
-        respuesta = self.editar(responsable="", artefacto="CU 09")
-        self.assertContains(respuesta, 'value="CU 09"')
-
-    def test_las_cuatro_validaciones_juntas(self):
-        respuesta = self.editar(tecnica="", artefacto="", responsable="", fecha="")
-        for mensaje in (
-            "Elige una técnica.",
-            "Escribe el artefacto o caso de uso.",
-            "Escribe el responsable.",
-            "Elige la fecha.",
-        ):
-            self.assertContains(respuesta, mensaje)
-
-    def test_longitudes_maximas(self):
-        respuesta = self.editar(artefacto="x" * 121, responsable="y" * 81)
-        self.assertContains(respuesta, "Máximo 120 caracteres.")
-        self.assertContains(respuesta, "Máximo 80 caracteres.")
-
-    def test_el_formulario_lleva_proteccion_csrf(self):
-        # Uno es el de "Cerrar sesión" del menú lateral y el otro el de este formulario.
-        self.assertContains(self.client.get(self.url), "csrfmiddlewaretoken", count=2)

@@ -75,7 +75,6 @@
           <th scope="col">Fecha</th>
           <th scope="col">Estado</th>
           <th scope="col">Enlace a la evidencia</th>
-          <th scope="col">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -115,7 +114,6 @@
               {% endif %}
             </form>
           </td>
-          <td><a class="boton boton-secundario boton-chico" href="{% url 'actividades:editar' actividad.pk %}">Editar</a></td>
         </tr>
         {% endfor %}
       </tbody>
@@ -125,6 +123,16 @@
   <p class="nota vacio-actividades">Este periodo todavía no tiene actividades. Planea la primera con el formulario de arriba.</p>
   {% endif %}
 </section>
+
+{# Aviso antes de planear: la actividad registrada ya no se puede editar #}
+<dialog id="confirmar-planear" class="dialogo" aria-labelledby="titulo-planear">
+  <h2 id="titulo-planear">¿Planear la actividad?</h2>
+  <p>Una vez planeada, la actividad no se podrá editar ni eliminar. Solo podrás cambiar su estado y su enlace de evidencia. ¿Deseas continuar?</p>
+  <div class="acciones acciones-derecha">
+    <button type="button" class="boton boton-secundario" data-accion="revisar">Revisar datos</button>
+    <button type="button" class="boton" data-accion="planear">Sí, planear</button>
+  </div>
+</dialog>
 
 {# FE-1: confirmación al cancelar con datos capturados #}
 <dialog id="confirmar-cancelar" class="dialogo" aria-labelledby="titulo-cancelar">
