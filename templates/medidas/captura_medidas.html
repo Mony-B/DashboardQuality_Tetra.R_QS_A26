@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Captura de medidas{% endblock %}
+
+{% block estilos %}<link rel="stylesheet" href="{% static 'css/medidas.css' %}">{% endblock %}
+
+{% block mensajes %}{% endblock %}
+
+{% block contenido %}
+<nav class="migas" aria-label="Ruta">
+  <a href="{{ url_mis_proyectos }}">Mis proyectos</a> › {{ proyecto.nombre }}
+</nav>
+<h1>Captura de medidas</h1>
+<p class="nota subtitulo">
+  {% if recien_guardado %}
+    {{ proyecto.nombre }} · {{ periodo.etiqueta }}
+  {% elif tenia_medidas %}
+    Corrige las medidas capturadas anteriormente de este periodo.
+  {% else %}
+    Este periodo todavía no tiene medidas. Captura los dos totales de cada métrica. Puedes capturarlas por partes y corregirlas cuantas veces quieras.
+  {% endif %}
+</p>
+
+{% if recien_guardado %}
+  <p class="aviso aviso-exito" role="status">
+    <strong>Medidas guardadas.</strong> El sistema solicitó el recálculo de las métricas, el índice y el estado de salud del periodo (CU 04).
+  </p>
+{% endif %}
+{% if form.errors %}
+  <p class="aviso aviso-error" role="alert">
+    <strong>No se guardó.</strong> Revisa los campos marcados; lo que capturaste se conserva.
+  </p>
+{% endif %}
+
+<div class="selectores">
+  <div class="campo">
+    <label for="selector-proyecto">Proyecto</label>
+    <select id="selector-proyecto" data-actual="{{ proyecto.pk }}"></select>
+  </div>
+  <div class="campo">
+    <label for="selector-periodo">Periodo</label>
+    <select id="selector-periodo" data-actual="{{ periodo.pk }}"></select>
+  </div>
+</div>
+<p class="nota resumen-periodo">{{ proyecto.nombre }} · {{ periodo.etiqueta }}</p>
+
+<form method="post" id="form-medidas" novalidate>
+  {% csrf_token %}
+
+  <div class="bloques">
+    {% for bloque in bloques %}
+    <fieldset class="bloque">
+      <legend>{{ bloque.titulo }}</legend>
+      <p class="formula">Fórmula: <code>{{ bloque.formula }}</code> · Unidad: <code>{{ bloque.unidad }}</code></p>
+      <div class="par-campos">
+        {% for campo, ayuda in bloque.campos %}
+        <div class="campo{% if campo.errors %} campo-error{% endif %}">
+          <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+          {{ campo }}
+          {% for error in campo.errors %}<p class="error">{{ error }}</p>{% empty %}<small class="ayuda">{{ ayuda }}</small>{% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </fieldset>
+    {% endfor %}
+  </div>
+
+  <div class="campo-casilla">
+    {{ form.defecto_critico_abierto }}
+    <label for="{{ form.defecto_critico_abierto.id_for_label }}">{{ form.defecto_critico_abierto.label }}</label>
+    <small class="ayuda">Impide una función esencial o compromete la seguridad. Marcarlo vuelve «Crítico» el estado del periodo.</small>
+  </div>
+
+  <div class="acciones">
+    <button type="submit" class="boton">Guardar medidas</button>
+    <button type="button" class="boton boton-secundario" id="boton-cancelar" data-destino="{{ url_mis_proyectos }}">Cancelar</button>
+  </div>
+</form>
+
+<dialog id="dialogo-cancelar" aria-labelledby="titulo-cancelar">
+  <h2 id="titulo-cancelar">¿Cancelar la captura?</h2>
+  <p>Se perderán los cambios sin guardar. ¿Deseas cancelar?</p>
+  <div class="acciones">
+    <button type="button" class="boton boton-secundario" data-cerrar>Seguir editando</button>
+    <button type="button" class="boton" data-confirmar>Sí, cancelar</button>
+  </div>
+</dialog>
+
+<dialog id="dialogo-cambiar" aria-labelledby="titulo-cambiar">
+  <h2 id="titulo-cambiar">¿Cambiar de periodo?</h2>
+  <p>Se perderán los cambios sin guardar. ¿Deseas continuar?</p>
+  <div class="acciones">
+    <button type="button" class="boton boton-secundario" data-cerrar>Seguir editando</button>
+    <button type="button" class="boton" data-confirmar>Sí, continuar</button>
+  </div>
+</dialog>
+
+{{ selector|json_script:"datos-selector" }}
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'js/captura_medidas.js' %}"></script>{% endblock %}

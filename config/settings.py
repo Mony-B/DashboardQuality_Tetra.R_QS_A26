@@ -59,6 +59,8 @@ INSTALLED_APPS = [
     # Apps del proyecto (una por dominio / caso de uso; ver docs/arquitectura.md)
     "apps.core",
     "apps.cuentas",
+    "apps.proyectos",
+    "apps.medidas",
 ]
 
 MIDDLEWARE = [

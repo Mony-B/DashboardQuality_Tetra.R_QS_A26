@@ -13,8 +13,8 @@
     <a class="marca" href="{% url 'core:inicio' %}">Dashboard SQA</a>
     <nav class="menu">
       {# Se activan conforme se agreguen las apps de cada caso de uso #}
-      <span class="menu-item pendiente" title="CU 01">Mis proyectos</span>
-      <span class="menu-item pendiente" title="CU 02">Captura de medidas</span>
+      <a class="menu-item{% if menu_activo == 'proyectos' %} activo{% endif %}" href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a>
+      <a class="menu-item{% if menu_activo == 'medidas' %} activo{% endif %}" href="{% url 'medidas:inicio' %}">Captura de medidas</a>
       <span class="menu-item pendiente" title="CU 03">Actividades SQA</span>
       <span class="menu-item pendiente" title="CU 04">Dashboard</span>
       <span class="menu-item pendiente" title="CU 05">Reportes</span>
@@ -28,6 +28,7 @@
   {% endif %}
 
   <main class="contenido">
+    {% block mensajes %}
     {% if messages %}
     <ul class="mensajes">
       {% for message in messages %}
@@ -35,6 +36,7 @@
       {% endfor %}
     </ul>
     {% endif %}
+    {% endblock %}
 
     {% block contenido %}{% endblock %}
   </main>

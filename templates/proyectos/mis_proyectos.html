@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis proyectos{% endblock %}
+
+{% block contenido %}
+<h1>Mis proyectos</h1>
+
+{% for proyecto in proyectos %}
+  {% with periodo=proyecto.periodo_actual %}
+  <section class="tarjeta tarjeta-proyecto">
+    <h2>{{ proyecto.nombre }}</h2>
+    <p class="nota">Marco de trabajo: {{ proyecto.marco_trabajo }}</p>
+    {% if periodo %}
+      <p>Periodo actual: {{ periodo.etiqueta }}</p>
+      <a class="boton boton-secundario" href="{{ periodo.get_absolute_url_medidas }}">Capturar medidas</a>
+    {% else %}
+      <p class="nota">Este proyecto todavía no tiene periodos.</p>
+    {% endif %}
+  </section>
+  {% endwith %}
+{% empty %}
+  <p class="nota">Todavía no tienes proyectos. El registro de proyectos llega con el CU 01.</p>
+{% endfor %}
+{% endblock %}

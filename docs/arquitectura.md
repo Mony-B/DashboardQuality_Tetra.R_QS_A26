@@ -18,7 +18,9 @@ dashboard-sqa/
 ├── config/            # settings, urls raíz, wsgi/asgi
 ├── apps/
 │   ├── core/          # plantilla base, inicio, mixins compartidos
-│   └── cuentas/       # crear cuenta, iniciar y cerrar sesión (R1)
+│   ├── cuentas/       # crear cuenta, iniciar y cerrar sesión (R1)
+│   ├── proyectos/     # proyectos y periodos, con las medidas de cada periodo (CU 01, CU 02)
+│   └── medidas/       # captura de las medidas del periodo (CU 02)
 ├── templates/         # plantillas, una carpeta por app + base.html
 ├── static/            # css y js
 └── docs/
@@ -30,7 +32,7 @@ Cada caso de uso vive en su propia app dentro de `apps/`:
 
 | App | Caso de uso | Requisitos |
 |---|---|---|
-| `proyectos` | CU 01 · Iniciar el monitoreo de un proyecto | R2–R4 |
+| `proyectos` | CU 01 · Iniciar el monitoreo de un proyecto (también guarda las medidas del periodo) | R2–R4 |
 | `medidas` | CU 02 · Registrar las medidas del periodo | R5–R7 |
 | `actividades` | CU 03 · Planear y dar seguimiento a las actividades SQA | R8–R9 |
 | `tablero` | CU 04 · Evaluar la salud del proyecto | R10–R18 |
