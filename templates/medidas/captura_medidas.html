@@ -64,12 +64,6 @@
     {% endfor %}
   </div>
 
-  <div class="campo-casilla">
-    {{ form.defecto_critico_abierto }}
-    <label for="{{ form.defecto_critico_abierto.id_for_label }}">{{ form.defecto_critico_abierto.label }}</label>
-    <small class="ayuda">Impide una función esencial o compromete la seguridad. Marcarlo vuelve «Crítico» el estado del periodo.</small>
-  </div>
-
   <div class="acciones">
     <button type="submit" class="boton">Guardar medidas</button>
     <button type="button" class="boton boton-secundario" id="boton-cancelar" data-destino="{{ url_mis_proyectos }}">Cancelar</button>

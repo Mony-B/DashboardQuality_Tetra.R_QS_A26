@@ -67,9 +67,6 @@ class Periodo(models.Model):
     kloc = models.DecimalField(
         "tamaño del código (KLOC)", max_digits=8, decimal_places=3, null=True, blank=True
     )
-    defecto_critico_abierto = models.BooleanField(
-        "existe un defecto crítico abierto", default=False
-    )
 
     class Meta:
         ordering = ["fecha_inicio"]

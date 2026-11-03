@@ -65,7 +65,6 @@ class PantallaTests(BaseCapturaTests):
             self.assertContains(respuesta, titulo)
         self.assertContains(respuesta, "Fórmula:", count=4)
         self.assertContains(respuesta, "defectos/KLOC")
-        self.assertContains(respuesta, "Existe un defecto crítico abierto")
         self.assertContains(respuesta, "Guardar medidas")
         self.assertContains(respuesta, "Cancelar")
 
@@ -127,10 +126,10 @@ class AccesoTests(BaseCapturaTests):
 
 
 class GuardarTests(BaseCapturaTests):
-    """R5 y R7: guardar las ocho medidas y la marca, y recalcular."""
+    """R5 y R7: guardar las ocho medidas y recalcular."""
 
-    def test_guarda_las_ocho_medidas_y_la_marca_de_defecto_critico(self):
-        respuesta = self.enviar(defecto_critico_abierto="on")
+    def test_guarda_las_ocho_medidas(self):
+        respuesta = self.enviar()
         self.assertRedirects(respuesta, self.url)
         self.periodo.refresh_from_db()
         self.assertEqual(self.periodo.funciones_requeridas, 10)
@@ -141,19 +140,12 @@ class GuardarTests(BaseCapturaTests):
         self.assertEqual(self.periodo.requisitos_con_prueba, 21)
         self.assertEqual(self.periodo.defectos_codigo, 14)
         self.assertEqual(self.periodo.kloc, Decimal("3.2"))
-        self.assertTrue(self.periodo.defecto_critico_abierto)
 
     def test_muestra_medidas_guardadas_y_conserva_los_valores(self):
         respuesta = self.enviar()
         respuesta = self.client.get(respuesta.url)
         self.assertContains(respuesta, "Medidas guardadas.")
         self.assertContains(respuesta, 'value="42"')
-
-    def test_desmarcar_el_defecto_critico_lo_guarda_como_falso(self):
-        self.enviar(defecto_critico_abierto="on")
-        self.enviar()
-        self.periodo.refresh_from_db()
-        self.assertFalse(self.periodo.defecto_critico_abierto)
 
     def test_recalcula_la_salud_al_guardar(self):
         with mock.patch.object(Periodo, "recalcular_salud") as recalcular:
