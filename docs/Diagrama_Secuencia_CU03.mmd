@@ -1,0 +1,97 @@
+---
+title: CU03 · Planear y dar seguimiento a las actividades SQA
+---
+sequenceDiagram
+    autonumber
+    actor U as Usuario
+    box rgb(250,230,210) Django - template
+        participant T as «template»<br/>actividades_sqa.html
+    end
+    box rgb(249,225,224) Django - view
+        participant VI as «view»<br/>inicio_actividades_view()
+        participant VA as «view»<br/>actividades_view()
+        participant VP as «view»<br/>planear_actividad_view()
+        participant VE as «view»<br/>cambiar_estado_view()
+        participant VL as «view»<br/>guardar_enlace_view()
+    end
+    box rgb(235,235,248) Django - model
+        participant MP as «model»<br/>Periodo
+        participant MA as «model»<br/>Actividad
+    end
+
+    Note over U,VI: Precondición: el usuario inició sesión y tiene un proyecto con un periodo
+    U->>T: Clic en «Actividades SQA» del menú
+    T->>VI: GET /actividades/
+    VI->>MP: Buscar el periodo actual del primer proyecto del usuario
+    MP-->>VI: Periodo actual
+    VI-->>T: Redirige a GET /periodos/{id}/actividades/
+    T->>VA: GET /periodos/{id}/actividades/
+    VA->>MP: Buscar el periodo del usuario
+    MP-->>VA: Periodo, o 404 si es ajeno
+    VA->>MA: Listar las actividades del periodo
+    MA-->>VA: Actividades
+    VA-->>T: Formulario «Planear una actividad» y tabla
+    alt FA-5: el periodo no tiene actividades
+        T-->>U: «Este periodo todavía no tiene actividades...»
+    else El periodo tiene actividades
+        T-->>U: Muestra el formulario y la tabla con estado y enlace
+    end
+
+    loop Mientras los datos no sean válidos
+        U->>T: Elige técnica, captura artefacto, responsable y fecha y clic en «Planear actividad»
+        T->>VP: POST /periodos/{id}/actividades/nueva/
+        VP->>VP: Validar técnica, artefacto o CU, responsable y fecha
+        alt Datos válidos
+            VP->>MA: Crear la actividad en estado «planeada»
+            MA-->>VP: Actividad creada
+            VP-->>T: Redirige a GET /periodos/{id}/actividades/
+            T-->>U: Muestra la actividad y «Actividad planeada con estado «planeada».»
+        else FA-1: campo obligatorio vacío
+            VP-->>T: Formulario con los datos capturados y los errores
+            T-->>U: Mensaje junto a cada campo (ej. «Elige una técnica.»)
+        end
+    end
+
+    rect rgb(232, 241, 252)
+        Note over U,MA: Seguimiento al aplicar la técnica
+        U->>T: Cambia el estado de la actividad (FA-4: también hacia atrás)
+        T->>VE: POST /actividades/{id}/estado/
+        VE->>MA: Guardar el nuevo estado y conservar el enlace
+        MA-->>VE: Estado guardado
+        VE-->>T: Redirige a GET /periodos/{id}/actividades/
+        T-->>U: «Estado actualizado a «en curso».»
+        U->>T: Captura el enlace (o vacía el campo) y clic en «Guardar»
+        T->>VL: POST /actividades/{id}/enlace/
+        VL->>VL: Validar que el campo esté vacío o sea una URL http:// o https://
+        alt Enlace válido
+            VL->>MA: Guardar el enlace
+            MA-->>VL: Enlace guardado
+            VL-->>T: Redirige a GET /periodos/{id}/actividades/
+            T-->>U: «Enlace de evidencia guardado.»
+        else FA-3: campo vacío
+            VL->>MA: Quitar el enlace
+            MA-->>VL: Enlace quitado
+            VL-->>T: Redirige a GET /periodos/{id}/actividades/
+            T-->>U: «Enlace de evidencia quitado.»
+        else FA-2: enlace inválido
+            VL-->>T: Tabla con el error en la fila y el enlace anterior sin cambios
+            T-->>U: «Escribe un enlace válido que empiece con http:// o https://.»
+        end
+    end
+
+    rect rgb(253, 236, 231)
+        Note over U,T: FE-1 Cancelar la planeación (diálogo en el navegador)
+        U->>T: Clic en «Cancelar»
+        alt Ya capturó algún dato
+            T-->>U: «Se perderán los datos capturados. ¿Deseas cancelar?»
+            alt Clic en «Sí, cancelar»
+                U->>T: Confirma
+                T-->>U: Vacía el formulario sin registrar la actividad y permanece en Actividades SQA
+            else Clic en «Seguir capturando»
+                U->>T: Sigue capturando
+                T-->>U: Vuelve al formulario con los datos capturados
+            end
+        else No ha capturado datos
+            T-->>U: Vacía el formulario y permanece en Actividades SQA
+        end
+    end
