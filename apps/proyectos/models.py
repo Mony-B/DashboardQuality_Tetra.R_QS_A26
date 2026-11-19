@@ -139,4 +139,3 @@ class Periodo(models.Model):
             .exclude(pk=self.pk)
             .order_by("fecha_inicio")
         )
-

@@ -89,4 +89,3 @@ def reglas():
 
 def pesos_texto():
     return ", ".join(f"{d.peso} %" for d in c.DEFINICIONES)
-

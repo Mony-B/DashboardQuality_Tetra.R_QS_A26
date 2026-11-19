@@ -68,7 +68,9 @@ class MensajeEstadoTests(TestCase):
         self.assertIn("en rojo", presentacion.mensaje_estado(salud))
 
     def test_sin_evaluar(self):
-        self.assertIn("No se calculó el índice", presentacion.mensaje_estado(c.evaluar(c.Medidas())))
+        self.assertIn(
+            "No se calculó el índice", presentacion.mensaje_estado(c.evaluar(c.Medidas()))
+        )
 
     def test_r18_cita_la_metrica_en_rojo(self):
         salud = c.Salud(
