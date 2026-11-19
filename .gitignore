@@ -18,7 +18,7 @@ media/
 # Calidad
 .coverage
 htmlcov/
-reportes/
+/reportes/
 .ruff_cache/
 
 # Editores y sistema

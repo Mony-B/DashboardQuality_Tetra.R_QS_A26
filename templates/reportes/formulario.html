@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Reportes{% endblock %}
+
+{% block estilos %}<link rel="stylesheet" href="{% static 'css/tablero.css' %}"><link rel="stylesheet" href="{% static 'css/reportes.css' %}">{% endblock %}
+
+{% block migas %}
+<nav class="migas" aria-label="Ruta">
+  <a href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a> › {{ proyecto.nombre }}
+</nav>
+{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Reportes</h1>
+    <p class="nota subtitulo">Elige el periodo y las secciones; el reporte se muestra en el navegador.</p>
+  </div>
+</header>
+
+{% if sin_medidas %}
+<p class="aviso aviso-error" role="alert">
+  Este periodo no tiene medidas capturadas. Captúralas en
+  <a href="{{ periodo.get_absolute_url_medidas }}">Captura de medidas</a> para generar el reporte.
+</p>
+{% endif %}
+
+<form method="get" id="form-reportes" class="tarjeta formulario" novalidate>
+  <h2 class="titulo-seccion">Generar reporte · * Obligatorio</h2>
+  <input type="hidden" name="enviado" value="1">
+
+  <div class="rejilla">
+    <div class="campo">
+      <label for="selector-proyecto">Proyecto *</label>
+      <select id="selector-proyecto" name="proyecto">
+        {% for p in proyectos %}
+        <option value="{{ p.pk }}"{% if p.pk == proyecto.pk %} selected{% endif %}>{{ p.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="campo">
+      <label for="selector-periodo">Periodo *</label>
+      <select id="selector-periodo" name="periodo">
+        {% for p in periodos %}
+        <option value="{{ p.pk }}"{% if p.pk == periodo.pk %} selected{% endif %}>{{ p.etiqueta }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <fieldset class="secciones{% if error_secciones %} campo-error{% endif %}">
+    <legend>Secciones a incluir * <span class="nota">(elige al menos una)</span></legend>
+    {% for clave, texto, marcada in secciones %}
+    <label class="casilla"><input type="checkbox" name="secciones" value="{{ clave }}"{% if marcada %} checked{% endif %}> {{ texto }}</label>
+    {% endfor %}
+    {% if error_secciones %}<p class="error" role="alert">{{ error_secciones }}</p>{% endif %}
+  </fieldset>
+
+  <div class="acciones">
+    <button type="submit" name="generar" value="1" class="boton">Generar reporte</button>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'js/reportes.js' %}"></script>{% endblock %}

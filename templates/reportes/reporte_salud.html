@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Reporte de salud{% endblock %}
+
+{% block estilos %}<link rel="stylesheet" href="{% static 'css/tablero.css' %}"><link rel="stylesheet" href="{% static 'css/reportes.css' %}">{% endblock %}
+
+{% block migas %}
+<nav class="migas no-imprimir" aria-label="Ruta">
+  <a href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a> › {{ proyecto.nombre }}
+</nav>
+{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Reporte de salud</h1>
+    <p class="nota subtitulo no-imprimir">Se imprime con la función de impresión del navegador. El reporte no se guarda: si cambian las medidas, genéralo de nuevo.</p>
+  </div>
+  <a class="boton boton-secundario no-imprimir" href="{% url 'reportes:reportes' %}{{ volver }}">Generar otro reporte</a>
+</header>
+
+<article class="reporte">
+  <dl class="encabezado-reporte">
+    <div><dt>Proyecto</dt><dd>{{ proyecto.nombre }}</dd></div>
+    <div><dt>Marco de trabajo</dt><dd>{{ proyecto.marco_trabajo }}</dd></div>
+    <div><dt>Periodo</dt><dd>{{ periodo.etiqueta }}</dd></div>
+    <div><dt>Generado el</dt><dd>{{ generado_el|date:"d/m/Y" }}</dd></div>
+    <div><dt>Generado por</dt><dd>{{ generado_por }}</dd></div>
+  </dl>
+
+  {% if "resumen" in marcadas %}
+  <section aria-labelledby="sec-resumen">
+    <h2 id="sec-resumen">Resumen de salud</h2>
+    <p class="resumen">
+      {% if indice %}<span class="grande">{{ indice }}</span> <span class="nota">/ 100</span>{% else %}<span class="grande">—</span> <span class="nota">índice sin calcular</span>{% endif %}
+      <span class="sello sello-{{ salud.estado }}">{{ salud.nombre_estado }}</span>
+    </p>
+  </section>
+  {% endif %}
+
+  {% if "metricas" in marcadas %}
+  <section aria-labelledby="sec-metricas">
+    <h2 id="sec-metricas">Métricas y su aporte al índice</h2>
+    <table class="tabla">
+      <thead><tr><th>Métrica</th><th>Valor</th><th>Semáforo</th><th>Peso</th><th>Aporte</th></tr></thead>
+      <tbody>
+        {% for m in metricas %}
+        <tr>
+          <td>{{ m.codigo }} · {{ m.nombre }}</td>
+          <td>{% if m.sin_datos %}sin datos{% else %}{{ m.valor }}{% if m.unidad_texto %} {{ m.unidad_texto }}{% endif %}{% endif %}</td>
+          <td>{{ m.nombre_semaforo }}</td>
+          <td>{{ m.peso }} %</td>
+          <td>{% if m.sin_datos %}—{% else %}{{ m.aporte }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endif %}
+
+  {% if "medidas" in marcadas %}
+  <section aria-labelledby="sec-medidas">
+    <h2 id="sec-medidas">Medidas del periodo</h2>
+    <table class="tabla">
+      <tbody>
+        {% for etiqueta, valor in medidas %}
+        <tr><td>{{ etiqueta }}</td><td>{{ valor }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endif %}
+
+  {% if "actividades" in marcadas %}
+  <section aria-labelledby="sec-actividades">
+    <h2 id="sec-actividades">Actividades SQA</h2>
+    {% if actividades %}
+    <table class="tabla">
+      <thead><tr><th>Técnica</th><th>Artefacto o CU</th><th>Responsable</th><th>Estado</th><th>Evidencia</th></tr></thead>
+      <tbody>
+        {% for a in actividades %}
+        <tr>
+          <td>{{ a.tecnica }}</td>
+          <td>{{ a.artefacto }}</td>
+          <td>{{ a.responsable }}</td>
+          <td>{{ a.estado }}</td>
+          <td>{% if a.enlace %}<a href="{{ a.enlace }}" target="_blank" rel="noopener noreferrer">Abrir evidencia</a>{% else %}Sin enlace{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="nota">Las actividades SQA no forman parte del índice de salud.</p>
+    {% else %}
+    <p>{{ mensaje_sin_actividades }}</p>
+    {% endif %}
+  </section>
+  {% endif %}
+</article>
+{% endblock %}
