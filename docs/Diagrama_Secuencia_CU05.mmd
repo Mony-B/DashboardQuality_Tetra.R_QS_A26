@@ -1,0 +1,95 @@
+---
+title: CU05 · Generar el reporte de salud de un periodo
+---
+sequenceDiagram
+    autonumber
+    actor U as Usuario
+    box rgb(250,230,210) Django - template
+        participant TF as «template»<br/>formulario.html
+        participant TR as «template»<br/>reporte_salud.html
+    end
+    box rgb(249,225,224) Django - view
+        participant V as «view»<br/>reportes_view()
+    end
+    box rgb(235,235,248) Django - model
+        participant MY as «model»<br/>Proyecto
+        participant MP as «model»<br/>Periodo
+        participant MA as «model»<br/>Actividad
+    end
+
+    Note over U,V: Precondición: el usuario inició sesión y tiene un proyecto con un periodo
+    U->>TF: Abre «Reportes» en el menú
+    TF->>V: GET /reportes/
+
+    alt FE-3: el usuario no tiene sesión iniciada
+        V-->>U: Redirige a GET /cuentas/iniciar-sesion/ sin mostrar datos
+    else Hay sesión
+        V->>MY: Listar los proyectos del usuario con sus periodos
+        MY-->>V: Proyectos y periodos del usuario
+        alt Sin proyectos o proyecto sin periodos
+            V-->>U: Redirige a GET /proyectos/ con un mensaje informativo
+        else FE-2: proyecto o periodo ajeno o inexistente
+            V->>V: Buscar el periodo solo entre los proyectos del usuario
+            V-->>U: Responde 404 con «No encontramos este proyecto o periodo» sin ningún dato
+        else Proyecto y periodo del usuario
+            V->>V: Tomar el periodo pedido o el actual, con las cuatro secciones marcadas
+            V-->>TF: Render del formulario con proyecto, periodo y secciones
+            TF-->>U: Muestra el formulario con las cuatro secciones marcadas
+        end
+    end
+
+    loop Mientras el usuario no genere un reporte válido
+        opt Cambia de proyecto
+            U->>TF: Elige otro proyecto
+            TF->>V: GET /reportes/ con el proyecto elegido
+            V-->>TF: Render del formulario con el periodo actual de ese proyecto
+            TF-->>U: Muestra el formulario del proyecto elegido
+        end
+        U->>TF: Elige proyecto, periodo y secciones y hace clic en «Generar reporte»
+        TF->>V: GET /reportes/ con proyecto, periodo, secciones y generar
+        V->>V: Validar que haya al menos una sección elegida
+        V->>MP: Consultar si el periodo tiene medidas capturadas
+        MP-->>V: Sí o no
+        alt FA-2: ninguna sección elegida
+            V-->>TF: Render del formulario con el error de secciones
+            TF-->>U: Muestra «Elige al menos una sección.» junto a las secciones
+        else FA-1: el periodo no tiene medidas
+            V-->>TF: Render del formulario con el aviso de periodo sin medidas
+            TF-->>U: Muestra «Este periodo no tiene medidas capturadas...» con enlace a Captura de medidas
+        else Datos válidos
+            V->>V: Calcular métricas, índice y estado con la misma lógica del CU04
+            opt Se eligió la sección Actividades SQA
+                V->>MA: Listar las actividades del periodo
+                MA-->>V: Actividades del periodo
+            end
+            V-->>TR: Render con el encabezado y solo las secciones elegidas
+            TR-->>U: Muestra el reporte en el navegador
+            alt FA-3: una métrica sin datos
+                TR-->>U: Muestra la métrica «sin datos», el índice sin calcular y el estado «Sin evaluar»
+            end
+            alt FA-4: sin actividades en la sección Actividades SQA
+                TR-->>U: Muestra «No hay actividades SQA registradas en este periodo.»
+            end
+        end
+    end
+
+    opt El usuario necesita una copia
+        U->>TR: Imprime con la función de impresión del navegador
+        TR-->>U: Se imprime el reporte, sin guardarlo ni exportarlo
+    end
+
+    rect rgb(232, 241, 252)
+        Note over U,MA: FA-5 Generar otro reporte
+        U->>TR: Hace clic en «Generar otro reporte»
+        TR->>V: GET /reportes/ con el proyecto, periodo y secciones anteriores
+        V-->>TF: Render del formulario con lo mismo elegido
+        TF-->>U: Muestra el formulario para cambiar el periodo o las secciones. El reporte anterior no se guarda
+    end
+
+    rect rgb(253, 236, 231)
+        Note over U,TF: FE-1 Abandono
+        U->>TF: Elige proyecto, periodo y secciones y cambia a otra pantalla sin generar
+        TF-->>U: No se genera el reporte ni se guarda lo elegido
+    end
+
+    Note over U,MA: Consultar o generar un reporte no modifica ninguna medida, actividad ni el índice
