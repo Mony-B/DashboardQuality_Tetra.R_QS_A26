@@ -1,69 +1,77 @@
+---
+title: CU04 · Evaluar la salud del proyecto en un periodo
+---
 sequenceDiagram
     autonumber
     actor U as Usuario
-    participant T as «template»<br/>dashboard_salud.html
-    participant V as «view»<br/>dashboard_salud_view()
-    participant MY as «model»<br/>Proyecto
-    participant MP as «model»<br/>Periodo
+    box rgb(250,230,210) Django - template
+        participant T as «template»<br/>dashboard_salud.html
+    end
+    box rgb(248,225,225) Django - view
+        participant V as «view»<br/>dashboard_salud_view()
+    end
+    box rgb(235,235,248) Django - model
+        participant MY as «model»<br/>Proyecto
+        participant MP as «model»<br/>Periodo
+    end
 
-    U->>T: Clic en "Dashboard" del menú
-    T->>V: GET /dashboard/
-    V->>MY: Listar los proyectos del usuario con sus periodos
-    MY-->>V: Proyectos y periodos
+    Note over U,V: Precondición: el usuario inició sesión y tiene un proyecto con un periodo
+    U->>T: Abre el Dashboard y elige proyecto y periodo
+    T->>V: GET /dashboard/ con proyecto y periodo
 
-    alt El usuario no tiene proyectos
-        V-->>T: Redirige a GET /proyectos/ con "Registra un proyecto con al menos un periodo para ver su salud."
-        T-->>U: Muestra Mis proyectos con el mensaje
-    else El proyecto no tiene periodos
-        V-->>T: Redirige a GET /proyectos/ con "Este proyecto todavía no tiene periodos."
-        T-->>U: Muestra Mis proyectos con el mensaje
-    else Hay un periodo que mostrar
-        V->>MP: Tomar el periodo pedido, o el actual del proyecto por omisión
-        MP-->>V: Periodo con sus ocho medidas
-        V->>V: Calcular las cuatro métricas, su color y puntos, el índice y el estado general
-
-        alt Falta una medida o un denominador es 0 (FA-1)
-            V-->>T: Métrica "sin datos" con la medida que falta, índice sin calcular y estado "Sin evaluar"
-        else El índice es saludable pero una métrica está en rojo (FA-2)
-            V-->>T: Estado limitado a "En riesgo", índice conservado y motivo
-        else Datos completos
-            V-->>T: Índice, estado y las cuatro métricas con valor, color, peso, puntos y motivo
+    alt FE-2: el usuario no tiene sesión iniciada
+        V-->>U: Redirige a GET /cuentas/iniciar-sesion/ sin mostrar datos
+    else Hay sesión
+        V->>MY: Listar los proyectos del usuario con sus periodos
+        MY-->>V: Proyectos y periodos del usuario
+        alt Sin proyectos o proyecto sin periodos
+            V-->>T: Redirige a GET /proyectos/ con un mensaje informativo
+            T-->>U: Muestra Mis proyectos con el mensaje
+        else FE-1: proyecto o periodo ajeno
+            V->>V: Buscar el periodo solo entre los proyectos del usuario
+            V-->>U: Responde 404 sin mostrar ningún dato
+        else Proyecto y periodo del usuario
+            V->>V: Tomar el periodo elegido o el actual del proyecto
+            V->>MP: Leer las ocho medidas del periodo
+            MP-->>V: Medidas del periodo
+            V->>V: Calcular las cuatro métricas con calculo.evaluar()
+            alt FA-1: falta una medida o un denominador es 0
+                V->>V: Marcar la métrica «sin datos» e indicar qué medida falta
+                V->>V: Dejar el índice sin calcular y el estado en «Sin evaluar»
+            else Datos completos en las cuatro métricas
+                V->>V: Asignar color y puntos y calcular el índice y el estado
+                opt FA-2: índice saludable con una métrica en rojo
+                    V->>V: Limitar el estado a «En riesgo» y agregar el motivo
+                end
+            end
+            V->>V: Armar la tendencia de la métrica elegida con grafica.construir()
+            alt FA-4: el proyecto tiene un solo periodo
+                V->>V: Un solo punto y aviso «Se necesitan más periodos»
+            else FA-5: un periodo sin datos para la métrica
+                V->>V: Omitir ese punto, no contarlo como 0, y marcarlo «sin datos»
+            else Varios periodos con datos
+                V->>V: Un punto por periodo con el color de sus umbrales
+            end
+            V-->>T: Render con índice, estado, métricas, tendencia y tabla de umbrales
+            T-->>U: Muestra índice, estado general, las cuatro métricas, la gráfica y las reglas
         end
+    end
 
-        V->>V: Calcular la métrica elegida en cada periodo del proyecto
-        V-->>T: Gráfica de tendencia y tabla de umbrales y pesos
-        T-->>U: Muestra el índice, el estado, las cuatro métricas, la tendencia y las reglas
-
-        alt El proyecto solo tiene un periodo (FA-4)
-            T-->>U: Muestra un solo punto y "Se necesitan más periodos para ver una tendencia."
-        else Un periodo no tiene datos para la métrica (FA-5)
-            T-->>U: No dibuja punto para ese periodo y escribe "Iteración 2: sin datos"
+    loop Mientras el usuario revisa su dashboard
+        opt Elige otra métrica para la tendencia
+            U->>T: Elige otra métrica
+            T->>V: GET /dashboard/ con proyecto, periodo y métrica
+            V->>V: Recalcular el dashboard con la métrica elegida (mismas ramas FA-1, FA-2, FA-4 y FA-5)
+            V-->>T: Render del dashboard con la métrica elegida
+            T-->>U: Muestra la gráfica de esa métrica
+        end
+        opt FA-3: cambia de proyecto o de periodo
+            U->>T: Elige otro proyecto u otro periodo, sin cuadro de confirmación
+            T->>V: GET /dashboard/ con proyecto, periodo y métrica
+            V->>V: Recalcular el dashboard del periodo elegido (mismas ramas FA-1, FA-2, FA-4 y FA-5)
+            V-->>T: Render del dashboard del periodo elegido
+            T-->>U: Muestra el dashboard del periodo elegido
         end
     end
 
-    rect rgb(232, 241, 252)
-        Note over U,MP: FA-3 Cambiar de proyecto, de periodo o de métrica
-        U->>T: Elige otro proyecto, otro periodo u otra métrica en los selectores
-        T->>V: GET /dashboard/ con proyecto, periodo y métrica
-        V->>MP: Tomar el periodo elegido del usuario
-        MP-->>V: Periodo con sus ocho medidas
-        V->>V: Recalcular métricas, índice y tendencia
-        V-->>T: Dashboard del periodo elegido
-        T-->>U: Muestra el índice, las métricas y la tendencia sin cuadro de confirmación
-    end
-
-    rect rgb(253, 236, 231)
-        Note over U,MP: FE-1 Proyecto o periodo ajeno
-        U->>T: Abre por URL el Dashboard de un proyecto o periodo que no es suyo
-        T->>V: GET /dashboard/ con periodo ajeno
-        V->>MP: Buscar el periodo entre los proyectos del usuario
-        MP-->>V: No existe para ese usuario
-        V-->>T: Responde 404
-        T-->>U: Muestra la página 404 sin ningún dato
-    end
-
-    rect rgb(253, 236, 231)
-        Note over U,T: FE-2 Usuario sin sesión
-        U->>T: Abre /dashboard/ sin haber iniciado sesión
-        T-->>U: Lo envía a GET /cuentas/iniciar-sesion/ sin mostrar datos
-    end
+    Note over U,MP: Las actividades SQA (CU03) no entran al índice. Consultar el Dashboard no modifica ninguna medida ni actividad
