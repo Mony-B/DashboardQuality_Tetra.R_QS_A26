@@ -107,13 +107,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 # ---------------------------------------------------------------------------
 # Base de datos (solo se accede por el ORM; R23)
 # ---------------------------------------------------------------------------
+SQLITE_PATH = os.getenv("DJANGO_SQLITE_PATH")
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": Path(SQLITE_PATH) if SQLITE_PATH else BASE_DIR / "db.sqlite3",
     }
 }
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ---------------------------------------------------------------------------
