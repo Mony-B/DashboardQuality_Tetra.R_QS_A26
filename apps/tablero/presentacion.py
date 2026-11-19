@@ -27,6 +27,7 @@ def fila_metrica(resultado, medidas):
         "motivo": c.motivo(resultado),
         "faltante": c.medida_faltante(d, medidas) if resultado.sin_datos else "",
         "aporte_texto": "",
+        "aporte": "" if resultado.sin_datos else c.formatear(resultado.aporte),
     }
     if not resultado.sin_datos:
         fila["aporte_texto"] = (

@@ -1,0 +1,22 @@
+/* CU 05 · Reportes (usa las variables y piezas de base.css y tablero.css) */
+.titulo-seccion { margin-bottom: 0.75rem; }
+.secciones { border: 0; padding: 0; margin: 0 0 1rem; }
+.secciones legend { font-weight: 600; font-size: 0.9rem; padding: 0; margin-bottom: 0.4rem; }
+.casilla { display: flex; gap: 0.5rem; align-items: center; padding: 0.25rem 0; cursor: pointer; }
+.secciones.campo-error .casilla { color: var(--error); }
+
+.reporte { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); padding: 1.5rem; }
+.reporte h2 { font-size: 1rem; border-bottom: 1px solid var(--texto); padding-bottom: 0.2rem; margin: 1.25rem 0 0.6rem; }
+.encabezado-reporte { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 0.6rem 1.5rem; margin: 0; }
+.encabezado-reporte dt { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--texto-suave); }
+.encabezado-reporte dd { margin: 0; }
+.resumen { display: flex; align-items: center; gap: 0.75rem; margin: 0; }
+
+@media print {
+  body.con-menu { display: block; background: none; }
+  .lateral, .no-imprimir, .mensajes { display: none; }
+  .contenido { max-width: none; padding: 0; }
+  .reporte { border: 0; padding: 0; }
+  .tabla { page-break-inside: auto; }
+  .tabla tr { page-break-inside: avoid; }
+}

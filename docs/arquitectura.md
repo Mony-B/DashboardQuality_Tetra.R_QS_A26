@@ -34,13 +34,17 @@ Cada caso de uso vive en su propia app dentro de `apps/`:
 | `medidas` | CU 02 · Registrar las medidas del periodo | R5–R7 | Implementado (guarda las medidas en `Periodo`) |
 | `actividades` | CU 03 · Planear y dar seguimiento a las actividades SQA | R8–R9 | Implementado |
 | `tablero` | CU 04 · Evaluar la salud del proyecto en un periodo | R10–R18 | Implementado |
-| `reportes` | CU 05 · Generar el reporte de salud | R19 | Pendiente |
+| `reportes` | CU 05 · Generar el reporte de salud de un periodo | R19 | Implementado |
 
 ## Modelo de datos (hasta CU 01)
 
 - **Proyecto**: `usuario`, `nombre` (≤ 100, único por usuario), `marco_trabajo` (≤ 50), `descripcion` (≤ 500, opcional).
 - **Periodo**: `proyecto`, `nombre` (≤ 50, único por proyecto), `fecha_inicio`, `fecha_fin` (≥ inicio, la BD lo valida). Los periodos de un proyecto no se traslapan (lo valida el form). El periodo actual es el de inicio más reciente.
 - Las medidas del periodo (CU 02) viven en `Periodo`: ocho campos, vacíos hasta que se capturan.
+
+## Reporte de salud (CU 05)
+
+Una sola pantalla en `/reportes/`: sin `generar` en la URL muestra el formulario; con `generar` valida (proyecto y periodo del usuario, al menos una sección, periodo con medidas) y muestra el reporte en el navegador. No se guarda ni se exporta: se imprime con el navegador (`@media print` en `reportes.css`). Reutiliza el cálculo de `apps/tablero` para que sus valores coincidan con el Dashboard, y `apps/core/seleccion.py` para elegir proyecto y periodo de forma segura.
 
 ## Salud del periodo (CU 04)
 
