@@ -101,6 +101,12 @@ class FormularioTests(BaseReportes):
         actual = self.periodo("Entrega 2", (12, 12), (12, 24), **MEDIDAS_72)
         self.assertEqual(self.client.get(URL).context["periodo"], actual)
 
+    def test_el_formulario_conserva_lo_elegido_al_regenerar(self):
+        periodo = self.periodo(**MEDIDAS_72)
+        respuesta = self.generar(periodo, secciones=[])
+        self.assertEqual(respuesta.context["periodo"], periodo)
+        self.assertEqual(respuesta.context["proyecto"], self.proyecto)
+
     def test_el_menu_lleva_a_reportes(self):
         self.periodo(**MEDIDAS_72)
         self.assertContains(self.client.get(URL), f'href="{URL}"')
@@ -274,6 +280,14 @@ class ExcepcionesTests(BaseReportes):
         self.assertEqual(respuesta.status_code, 404)
         self.assertNotContains(respuesta, "Secreto", status_code=404)
 
+    def test_fe2_el_404_explica_y_ofrece_volver_a_reportes(self):
+        respuesta = self.client.get(URL, {"periodo": 999999})
+        self.assertEqual(respuesta.status_code, 404)
+        self.assertContains(respuesta, "No encontramos este proyecto o periodo", status_code=404)
+        self.assertContains(respuesta, "No existe o no es tuyo.", status_code=404)
+        self.assertContains(respuesta, f'href="{URL}"', status_code=404)
+        self.assertContains(respuesta, "Volver a Reportes", status_code=404)
+
     def test_fe2_proyecto_ajeno_responde_404(self):
         ajeno = Proyecto.objects.create(usuario=self.beto, nombre="Secreto", marco_trabajo="XP")
         self.periodo(**MEDIDAS_72)
@@ -309,6 +323,15 @@ class ExcepcionesTests(BaseReportes):
     def test_solo_acepta_lectura(self):
         self.periodo(**MEDIDAS_72)
         self.assertEqual(self.client.post(URL, {"generar": "1"}).status_code, 405)
+
+    def test_generar_el_mismo_reporte_dos_veces_no_crea_registros(self):
+        periodo = self.periodo(**MEDIDAS_72)
+        self.actividad(periodo)
+        self.generar(periodo)
+        self.generar(periodo)
+        self.assertEqual(Periodo.objects.count(), 1)
+        self.assertEqual(Actividad.objects.count(), 1)
+        self.assertEqual(Proyecto.objects.count(), 1)
 
     def test_fe1_abrir_reportes_y_salir_no_guarda_nada(self):
         periodo = self.periodo(**MEDIDAS_72)

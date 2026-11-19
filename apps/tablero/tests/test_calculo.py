@@ -32,6 +32,12 @@ class FormulasTests(TestCase):
         self.assertIsNone(c.valores(medidas(verif=0, con_prueba=0))["cobertura_requisitos"])
         self.assertIsNone(c.valores(medidas(kloc="0"))["densidad_defectos"])
 
+    def test_numerador_mayor_que_el_total_da_mas_de_cien_sin_romper_el_calculo(self):
+        # La captura (CU 02) lo rechaza; si llegara a la base no debe haber error ni dato falso.
+        v = c.valores(medidas(ejec=10, apro=12))
+        self.assertEqual(v["tasa_aprobacion"], D("120"))
+        self.assertEqual(c.evaluar(medidas(ejec=10, apro=12)).metricas[1].semaforo, c.VERDE)
+
     def test_cero_aprobados_es_un_dato_valido(self):
         self.assertEqual(c.valores(medidas(apro=0))["tasa_aprobacion"], D("0"))
 

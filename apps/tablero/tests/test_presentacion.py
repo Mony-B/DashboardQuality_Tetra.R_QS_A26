@@ -68,7 +68,8 @@ class MensajeEstadoTests(TestCase):
         self.assertIn("en rojo", presentacion.mensaje_estado(salud))
 
     def test_sin_evaluar(self):
-        self.assertIn("No se calculó el índice", presentacion.mensaje_estado(c.evaluar(c.Medidas())))
+        mensaje = presentacion.mensaje_estado(c.evaluar(c.Medidas()))
+        self.assertIn("No se calculó el índice", mensaje)
 
     def test_r18_cita_la_metrica_en_rojo(self):
         salud = c.Salud(
@@ -151,6 +152,10 @@ class GraficaTests(TestCase):
     def test_densidad_muy_alta_amplia_el_eje_hacia_arriba(self):
         datos = grafica.construir(M4, [("E1", D("9.2"))])
         self.assertEqual(datos["ejes"][-1]["texto"], "11")
+
+    def test_un_valor_sobre_cien_amplia_el_eje_hacia_arriba(self):
+        datos = grafica.construir(M2, [("E1", D("120"))])
+        self.assertEqual(datos["ejes"][-1]["texto"], "120")
 
     def test_valor_mas_alto_queda_mas_arriba(self):
         datos = grafica.construir(M1, [("E1", D("100")), ("E2", D("70"))])

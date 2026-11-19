@@ -7,6 +7,7 @@ parte de los proyectos del usuario: uno ajeno responde 404 (R21).
 """
 
 from django.contrib import messages
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET
@@ -74,14 +75,17 @@ def _reporte(request, proyecto, periodo, marcadas):
 def reportes_view(request):
     """Pasos 1 a 8 y FA-1 a FA-5."""
     proyectos = list(Proyecto.objects.filter(usuario=request.user).prefetch_related("periodos"))
-    proyecto_id = entero(request.GET.get("proyecto"))
-    periodo_id = entero(request.GET.get("periodo"))
     if not proyectos:
         messages.info(
             request, "Registra un proyecto con al menos un periodo para generar reportes."
         )
         return redirect("proyectos:mis_proyectos")
-    proyecto, periodo = ubicar(proyectos, proyecto_id, periodo_id)
+    try:
+        proyecto, periodo = ubicar(
+            proyectos, entero(request.GET.get("proyecto")), entero(request.GET.get("periodo"))
+        )
+    except Http404:  # FE-2: ajeno, inexistente o mal formado; no se muestra ningún dato
+        return render(request, "reportes/no_encontrado.html", status=404)
     if periodo is None:
         messages.info(request, "Este proyecto todavía no tiene periodos.")
         return redirect("proyectos:mis_proyectos")

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block titulo %}No encontrado{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Reportes</h1>
+    <p class="nota subtitulo">Elige el periodo y las secciones; el reporte se muestra en el navegador.</p>
+  </div>
+</header>
+
+<section class="tarjeta" role="alert">
+  <p class="titulo-seccion">404</p>
+  <h2>No encontramos este proyecto o periodo</h2>
+  <p>No existe o no es tuyo. No se muestra ningún dato.</p>
+  <p><a class="boton boton-secundario" href="{% url 'reportes:reportes' %}">Volver a Reportes</a></p>
+</section>
+{% endblock %}

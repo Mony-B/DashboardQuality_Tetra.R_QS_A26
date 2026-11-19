@@ -5,11 +5,6 @@ from . import calculo as c
 SEMAFOROS = {c.VERDE: "Verde", c.AMARILLO: "Amarillo", c.ROJO: "Rojo"}
 
 
-def _valor_con_unidad(definicion, valor):
-    texto = c.formatear(valor)
-    return f"{texto} %" if definicion.unidad == "%" else texto
-
-
 def fila_metrica(resultado, medidas):
     """Una métrica lista para la plantilla: valor, color, peso, puntos y motivo o faltante."""
     d = resultado.definicion
@@ -22,8 +17,8 @@ def fila_metrica(resultado, medidas):
         "sin_datos": resultado.sin_datos,
         "semaforo": resultado.semaforo or "sin-datos",
         "nombre_semaforo": SEMAFOROS.get(resultado.semaforo, "Sin datos"),
-        "unidad_texto": "" if d.unidad == "%" else d.unidad,
-        "valor": "" if resultado.sin_datos else _valor_con_unidad(d, resultado.valor),
+        "unidad_texto": d.unidad,
+        "valor": "" if resultado.sin_datos else c.formatear(resultado.valor),
         "motivo": c.motivo(resultado),
         "faltante": c.medida_faltante(d, medidas) if resultado.sin_datos else "",
         "aporte_texto": "",
@@ -33,9 +28,6 @@ def fila_metrica(resultado, medidas):
         fila["aporte_texto"] = (
             f"{resultado.puntos} pts × {d.peso} % = {c.formatear(resultado.aporte)} al índice"
         )
-        if d.unidad == "%":
-            fila["valor"] = c.formatear(resultado.valor)
-            fila["unidad_texto"] = "%"
     return fila
 
 
