@@ -29,7 +29,7 @@ def nuevo_proyecto_view(request):
         messages.success(
             request,
             f"Proyecto registrado. {periodo.proyecto.nombre} quedó con el periodo "
-            f"{periodo.nombre} y las metas sugeridas. Ya puedes capturar sus medidas.",
+            f"{periodo.nombre}. Ya puedes capturar sus medidas.",
         )
         return redirect(periodo.get_absolute_url_medidas())
     return render(request, "proyectos/nuevo_proyecto.html", {"form": form})

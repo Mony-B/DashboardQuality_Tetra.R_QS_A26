@@ -135,7 +135,7 @@ class ProyectoPeriodoForm(forms.Form):
 
     @transaction.atomic
     def save(self):
-        """Registra el proyecto (con sus 5 metas sugeridas) y el periodo; devuelve el periodo."""
+        """Registra el proyecto (si es nuevo) y el periodo; devuelve el periodo."""
         datos = self.cleaned_data
         proyecto = self.proyecto
         if proyecto is None:
@@ -145,7 +145,6 @@ class ProyectoPeriodoForm(forms.Form):
                 marco_trabajo=datos["marco_trabajo"],
                 descripcion=datos["descripcion"],
             )
-            proyecto.crear_metas_sugeridas()
         return Periodo.objects.create(
             proyecto=proyecto,
             nombre=datos["nombre_periodo"],

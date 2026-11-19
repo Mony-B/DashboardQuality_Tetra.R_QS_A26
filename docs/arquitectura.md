@@ -33,16 +33,23 @@ Cada caso de uso vive en su propia app dentro de `apps/`:
 | `proyectos` | CU 01 · Iniciar el monitoreo de un proyecto | R2–R4 | Implementado |
 | `medidas` | CU 02 · Registrar las medidas del periodo | R5–R7 | Implementado (guarda las medidas en `Periodo`) |
 | `actividades` | CU 03 · Planear y dar seguimiento a las actividades SQA | R8–R9 | Implementado |
-| `tablero` | CU 04 · Evaluar la salud del proyecto | R10–R18 | Pendiente |
+| `tablero` | CU 04 · Evaluar la salud del proyecto en un periodo | R10–R18 | Implementado |
 | `reportes` | CU 05 · Generar el reporte de salud | R19 | Pendiente |
 
 ## Modelo de datos (hasta CU 01)
 
 - **Proyecto**: `usuario`, `nombre` (≤ 100, único por usuario), `marco_trabajo` (≤ 50), `descripcion` (≤ 500, opcional).
 - **Periodo**: `proyecto`, `nombre` (≤ 50, único por proyecto), `fecha_inicio`, `fecha_fin` (≥ inicio, la BD lo valida). Los periodos de un proyecto no se traslapan (lo valida el form). El periodo actual es el de inicio más reciente.
-- **MetaProyecto**: `proyecto`, `metrica`, `valor` (%). Se crean las 5 metas sugeridas al registrar el proyecto.
+- Las medidas del periodo (CU 02) viven en `Periodo`: ocho campos, vacíos hasta que se capturan.
 
-El catálogo de las 5 métricas (claves, metas sugeridas y mínimos) está en `apps/proyectos/metricas.py`; CU 02 y CU 04 deben usarlo en lugar de repetir los valores.
+## Salud del periodo (CU 04)
+
+No se guarda: se calcula en el momento con las ocho medidas, así el Dashboard y Mis proyectos siempre reflejan lo último guardado.
+
+- `apps/tablero/calculo.py`: Python puro (sin ORM). Fórmulas de las cuatro métricas, semáforos, puntos (100/60/0), pesos (25/30/20/25), índice, estado y las reglas R16 (sin datos → «Sin evaluar») y R18. Es la única fuente de umbrales y pesos.
+- `apps/tablero/grafica.py`: coordenadas de la gráfica de tendencia; la plantilla dibuja el SVG en el servidor, sin JavaScript de gráficas.
+- `apps/tablero/presentacion.py`: textos del Dashboard (motivo, medida faltante, tabla de reglas).
+- `Periodo.salud()` y `Periodo.recalcular_salud()` envuelven el cálculo; `Proyecto.resumen_salud()` alimenta la tarjeta de Mis proyectos.
 
 Para crear una: `mkdir apps/<nombre> && python manage.py startapp <nombre> apps/<nombre>`, luego en su `apps.py` poner `name = "apps.<nombre>"` y agregarla a `INSTALLED_APPS`.
 

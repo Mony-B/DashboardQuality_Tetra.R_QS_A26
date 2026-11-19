@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Dashboard{% endblock %}
+
+{% block estilos %}<link rel="stylesheet" href="{% static 'css/tablero.css' %}">{% endblock %}
+
+{% block migas %}
+<nav class="migas" aria-label="Ruta">
+  <a href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a> › {{ proyecto.nombre }}
+</nav>
+{% endblock %}
+
+{% block contenido %}
+<header class="encabezado">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="nota subtitulo">Resultado de las cuatro métricas de calidad del periodo.</p>
+  </div>
+</header>
+
+<form method="get" id="form-dashboard" class="selectores">
+  <div class="campo">
+    <label for="selector-proyecto">Proyecto</label>
+    <select id="selector-proyecto" name="proyecto">
+      {% for p in proyectos %}
+      <option value="{{ p.pk }}"{% if p.pk == proyecto.pk %} selected{% endif %}>{{ p.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="campo">
+    <label for="selector-periodo">Periodo</label>
+    <select id="selector-periodo" name="periodo">
+      {% for p in periodos %}
+      <option value="{{ p.pk }}"{% if p.pk == periodo.pk %} selected{% endif %}>{{ p.etiqueta }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <input type="hidden" name="metrica" value="{{ definicion.clave }}">
+  <noscript><button type="submit" class="boton boton-secundario">Ver</button></noscript>
+</form>
+<p class="nota resumen-periodo">{{ proyecto.nombre }} · {{ periodo.etiqueta }}</p>
+
+<section class="tarjeta salud salud-{{ salud.estado }}" aria-labelledby="titulo-salud">
+  <div class="salud-indice">
+    <h2 id="titulo-salud" class="titulo-seccion">Salud general del producto</h2>
+    {% if indice %}
+    <p><span class="grande">{{ indice }}</span> <span class="nota">/ 100 puntos</span></p>
+    {% else %}
+    <p><span class="grande">—</span> <span class="nota">índice sin calcular</span></p>
+    {% endif %}
+  </div>
+  <div class="salud-estado">
+    <span class="sello sello-{{ salud.estado }}">{{ salud.nombre_estado }}</span>
+    <p class="nota">{{ mensaje_estado }}</p>
+  </div>
+</section>
+
+<ul class="metricas" aria-label="Métricas del periodo">
+  {% for m in metricas %}
+  <li class="tarjeta metrica metrica-{{ m.semaforo }}">
+    <h3>{{ m.codigo }} · {{ m.nombre }}</h3>
+    <p class="formula">{{ m.formula }}</p>
+    {% if m.sin_datos %}
+    <p class="valor valor-vacio">Sin datos</p>
+    {% else %}
+    <p class="valor">{{ m.valor }}{% if m.unidad_texto %}<span class="unidad"> {{ m.unidad_texto }}</span>{% endif %}</p>
+    {% endif %}
+    <p class="fila-meta"><span>Peso: {{ m.peso }} %</span><span class="sello sello-{{ m.semaforo }}">{{ m.nombre_semaforo }}</span></p>
+    {% if m.aporte_texto %}<p class="nota detalle">{{ m.aporte_texto }}</p>{% endif %}
+    {% if m.motivo %}<p class="detalle">{{ m.motivo }}</p>{% endif %}
+    {% if m.faltante %}<p class="detalle">{{ m.faltante }}</p>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+
+<div class="paneles">
+  <section class="tarjeta" aria-labelledby="titulo-tendencia">
+    <h2 id="titulo-tendencia" class="titulo-seccion">Tendencia por periodo</h2>
+    <form method="get" class="campo campo-metrica" id="form-metrica">
+      <input type="hidden" name="proyecto" value="{{ proyecto.pk }}">
+      <input type="hidden" name="periodo" value="{{ periodo.pk }}">
+      <label for="selector-metrica">Métrica</label>
+      <select id="selector-metrica" name="metrica">
+        {% for d in definiciones %}
+        <option value="{{ d.clave }}"{% if d.clave == definicion.clave %} selected{% endif %}>{{ d.codigo }} · {{ d.nombre }}</option>
+        {% endfor %}
+      </select>
+      <noscript><button type="submit" class="boton boton-secundario">Ver tendencia</button></noscript>
+    </form>
+
+    <svg class="grafica" viewBox="0 0 {{ tendencia.ancho }} {{ tendencia.alto }}" role="img"
+         aria-label="Tendencia de {{ definicion.nombre }} por periodo">
+      {% for eje in tendencia.ejes %}
+      <line x1="{{ tendencia.izq }}" y1="{{ eje.y }}" x2="{{ tendencia.der }}" y2="{{ eje.y }}" class="eje"/>
+      <text x="{{ tendencia.x_ejes }}" y="{{ eje.y_texto }}" text-anchor="end" class="eje-texto">{{ eje.texto }}{% if definicion.unidad == "%" %} %{% endif %}</text>
+      {% endfor %}
+      {% for segmento in tendencia.segmentos %}
+      <polyline points="{{ segmento }}" class="linea"/>
+      {% endfor %}
+      {% for punto in tendencia.puntos %}
+      <text x="{{ punto.x }}" y="{{ tendencia.y_etiquetas }}" text-anchor="middle" class="eje-texto">{{ punto.etiqueta }}</text>
+      {% if not punto.sin_datos %}
+      <circle cx="{{ punto.x }}" cy="{{ punto.y }}" r="6" fill="{{ punto.color }}" class="punto"/>
+      <text x="{{ punto.x }}" y="{{ punto.y_valor }}" text-anchor="middle" class="valor-punto">{{ punto.texto }}</text>
+      {% endif %}
+      {% endfor %}
+    </svg>
+    <p class="nota">Unidad: {{ definicion.unidad }}. Cada punto se colorea con los umbrales de la métrica.</p>
+
+    <ul class="lista-puntos">
+      {% for punto in tendencia.puntos %}
+      <li>{% if punto.sin_datos %}{{ punto.etiqueta }}: sin datos{% else %}{{ punto.etiqueta }}: {{ punto.texto }}{% if definicion.unidad == "%" %} %{% endif %} · {{ punto.semaforo|capfirst }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% if un_solo_periodo %}
+    <p class="aviso">Este proyecto solo tiene un periodo. Se necesitan más periodos para ver una tendencia.</p>
+    {% endif %}
+  </section>
+
+  <section class="tarjeta" aria-labelledby="titulo-reglas">
+    <h2 id="titulo-reglas" class="titulo-seccion">Reglas de evaluación</h2>
+    <table class="tabla">
+      <thead><tr><th>Métrica</th><th>Verde</th><th>Amarillo</th><th>Rojo</th></tr></thead>
+      <tbody>
+        {% for r in reglas %}
+        <tr><td>{{ r.codigo }} {{ r.nombre }}</td><td>{{ r.verde }}</td><td>{{ r.amarillo }}</td><td>{{ r.rojo }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="nota">Puntos: verde 100 · amarillo 60 · rojo 0. Pesos: {{ pesos }}.<br>
+      Saludable 85–100 · En riesgo 70–&lt; 85 · Crítico &lt; 70. Las actividades SQA no afectan el índice.</p>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}<script src="{% static 'js/dashboard.js' %}"></script>{% endblock %}

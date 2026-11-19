@@ -1,0 +1,59 @@
+/* CU 04 · Dashboard (usa las variables y piezas de base.css) */
+:root {
+  --verde: #2e8b4f;
+  --amarillo: #c18a00;
+  --rojo: #b3261e;
+  --sin-datos: #9b9a92;
+}
+
+.subtitulo { max-width: 52rem; }
+.selectores { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.selectores .campo { min-width: 16rem; margin-bottom: 0.5rem; }
+.resumen-periodo { margin: 0 0 1rem; font-size: 0.9rem; }
+.titulo-seccion { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); }
+
+.sello { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 0.15rem 0.6rem; border-radius: 999px; border: 1px solid var(--texto); background: var(--superficie); }
+.sello-verde, .sello-saludable { border-color: var(--verde); color: var(--verde); }
+.sello-amarillo, .sello-en_riesgo { border-color: var(--amarillo); color: #7a5600; }
+.sello-rojo, .sello-critico { border-color: var(--rojo); background: var(--rojo); color: #fff; }
+.sello-sin-datos, .sello-sin_evaluar { border-style: dashed; border-color: var(--sin-datos); color: var(--texto-suave); }
+
+.salud { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 1rem; border-left: 6px solid var(--sin-datos); }
+.salud-saludable { border-left-color: var(--verde); }
+.salud-en_riesgo { border-left-color: var(--amarillo); }
+.salud-critico { border-left-color: var(--rojo); }
+.salud-indice { min-width: 13rem; }
+.salud-indice p { margin: 0; }
+.grande { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.salud-estado .sello { font-size: 0.9rem; padding: 0.25rem 0.85rem; }
+.salud-estado p { margin: 0.4rem 0 0; max-width: 40rem; }
+
+.metricas { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+.metrica { border-top: 5px solid var(--sin-datos); }
+.metrica-verde { border-top-color: var(--verde); }
+.metrica-amarillo { border-top-color: var(--amarillo); }
+.metrica-rojo { border-top-color: var(--rojo); }
+.metrica h3 { margin: 0; font-size: 0.95rem; }
+.metrica .formula { color: var(--texto-suave); font-size: 0.78rem; margin: 0.15rem 0 0.5rem; }
+.valor { font-size: 1.7rem; font-weight: 700; margin: 0; }
+.valor-vacio { color: var(--texto-suave); font-size: 1.2rem; }
+.unidad { font-size: 0.8rem; font-weight: 400; }
+.fila-meta { display: flex; justify-content: space-between; align-items: center; margin: 0.5rem 0 0; font-size: 0.85rem; }
+.detalle { margin: 0.4rem 0 0; font-size: 0.85rem; }
+.metrica .nota.detalle { font-size: 0.8rem; }
+
+.paneles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+@media (max-width: 52rem) { .paneles { grid-template-columns: 1fr; } }
+.campo-metrica { max-width: 22rem; }
+.grafica { width: 100%; height: auto; max-width: 28rem; display: block; }
+.eje { stroke: #b9b7ae; stroke-dasharray: 4 3; }
+.eje-texto { font-size: 9px; fill: var(--texto-suave); }
+.linea { fill: none; stroke: var(--texto-suave); stroke-width: 1.5; }
+.punto { stroke: var(--texto); stroke-width: 1.5; }
+.valor-punto { font-size: 9px; font-weight: 700; fill: var(--texto); text-anchor: middle; }
+.lista-puntos { margin: 0.5rem 0; padding-left: 1.1rem; font-size: 0.85rem; color: var(--texto-suave); }
+
+.tabla { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 0.5rem; }
+.tabla th { text-align: left; font-size: 0.75rem; color: var(--texto-suave); padding: 0.3rem 0.4rem; border-bottom: 1px solid var(--borde); }
+.tabla td { padding: 0.35rem 0.4rem; border-bottom: 1px solid #ecebe5; }
+.salud-tarjeta { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.5rem; }

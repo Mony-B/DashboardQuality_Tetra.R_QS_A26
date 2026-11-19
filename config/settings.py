@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "apps.proyectos",
     "apps.medidas",
     "apps.actividades",
+    "apps.tablero",
 ]
 
 MIDDLEWARE = [

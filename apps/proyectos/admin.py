@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import MetaProyecto, Periodo, Proyecto
+from .models import Periodo, Proyecto
 
 
 class PeriodoInline(admin.TabularInline):
@@ -8,13 +8,8 @@ class PeriodoInline(admin.TabularInline):
     extra = 0
 
 
-class MetaInline(admin.TabularInline):
-    model = MetaProyecto
-    extra = 0
-
-
 @admin.register(Proyecto)
 class ProyectoAdmin(admin.ModelAdmin):
     list_display = ("nombre", "marco_trabajo", "usuario", "creado")
     list_filter = ("usuario",)
-    inlines = [PeriodoInline, MetaInline]
+    inlines = [PeriodoInline]

@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import F, Q
 from django.urls import reverse
 
-from .metricas import METRICAS, OPCIONES_METRICA
+from apps.tablero.calculo import SIN_EVALUAR, Medidas, evaluar, formatear
 
 
 class Proyecto(models.Model):
@@ -32,18 +32,23 @@ class Proyecto(models.Model):
         """El periodo con la fecha de inicio más reciente (requisito especial 7)."""
         return self.periodos.order_by("-fecha_inicio").first()
 
-    def metricas_en_meta(self):
-        """Cuántas de las 5 métricas del periodo actual están en meta (R4).
-
-        Sin medidas capturadas ninguna está en meta (postcondición 4 del CU 01).
-        El cálculo real llega con el CU 04, que debe reemplazar este método.
-        """
-        return 0
-
-    def crear_metas_sugeridas(self):
-        MetaProyecto.objects.bulk_create(
-            MetaProyecto(proyecto=self, metrica=m.clave, valor=m.meta_sugerida) for m in METRICAS
-        )
+    def resumen_salud(self):
+        """Estado de salud del periodo actual para la tarjeta de Mis proyectos (R4)."""
+        periodo = self.periodo_actual
+        if periodo is None or not periodo.tiene_medidas():
+            return {
+                "estado": SIN_EVALUAR,
+                "nombre": "Sin evaluar",
+                "indice": None,
+                "detalle": "Sin medidas",
+            }
+        salud = periodo.salud()
+        return {
+            "estado": salud.estado,
+            "nombre": salud.nombre_estado,
+            "indice": formatear(salud.indice) if salud.indice is not None else None,
+            "detalle": "Datos incompletos" if salud.estado == SIN_EVALUAR else "",
+        }
 
 
 class Periodo(models.Model):
@@ -111,12 +116,17 @@ class Periodo(models.Model):
             )
         )
 
-    def recalcular_salud(self):
-        """Recalcula las métricas, el índice y el estado de salud del periodo (R7).
+    def salud(self):
+        """Métricas, índice y estado de salud del periodo con las medidas guardadas (CU 04)."""
+        return evaluar(Medidas.de_periodo(self))
 
-        Punto de enganche con el CU 04: el CU 02 lo invoca cada vez que guarda medidas.
-        Hoy no hay nada que persistir; cuando el CU 04 guarde resultados, se hace aquí.
+    def recalcular_salud(self):
+        """Recalcula la salud del periodo cada vez que se guardan medidas (R7).
+
+        El CU 02 lo invoca al guardar. La salud no se almacena: se calcula a partir de las
+        ocho medidas, así el Dashboard y Mis proyectos siempre reflejan lo último guardado.
         """
+        return self.salud()
 
     def traslapes(self):
         """Periodos del mismo proyecto que comparten al menos un día con este (FA-4)."""
@@ -130,20 +140,3 @@ class Periodo(models.Model):
             .order_by("fecha_inicio")
         )
 
-
-class MetaProyecto(models.Model):
-    """Meta de una métrica para un proyecto; inicia con la sugerida (R2) y se ajusta en CU 04."""
-
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name="metas")
-    metrica = models.CharField(max_length=30, choices=OPCIONES_METRICA)
-    valor = models.PositiveSmallIntegerField("meta (%)")
-
-    class Meta:
-        verbose_name = "meta del proyecto"
-        verbose_name_plural = "metas del proyecto"
-        constraints = [
-            models.UniqueConstraint(fields=["proyecto", "metrica"], name="meta_unica_por_metrica"),
-        ]
-
-    def __str__(self):
-        return f"{self.get_metrica_display()}: {self.valor} %"

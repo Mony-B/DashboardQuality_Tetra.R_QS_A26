@@ -1,6 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %}Mis proyectos{% endblock %}
+
+{% block estilos %}<link rel="stylesheet" href="{% static 'css/tablero.css' %}">{% endblock %}
 
 {% block contenido %}
 <header class="encabezado">
@@ -21,11 +24,15 @@
       {{ proyecto.marco_trabajo }} · Periodo actual: {{ periodo.nombre|default:"—" }}<br>
       {% if periodo %}<span class="dato">{{ periodo.fecha_inicio|date:"d/m/Y" }} – {{ periodo.fecha_fin|date:"d/m/Y" }}</span>{% endif %}
     </p>
-    <p class="dato">Métricas en meta: {{ proyecto.metricas_en_meta }}/5</p>
+    {% with salud=proyecto.resumen_salud %}
+    <p class="salud-tarjeta">
+      <span class="sello sello-{{ salud.estado }}">{{ salud.nombre }}</span>
+      {% if salud.indice %}<span class="dato">Índice {{ salud.indice }}</span>{% elif salud.detalle %}<span class="dato">{{ salud.detalle }}</span>{% endif %}
+    </p>
+    {% endwith %}
     <div class="acciones">
       <a class="boton boton-secundario" href="{% url 'proyectos:nuevo_periodo' proyecto.pk %}">Nuevo periodo</a>
-      {# El enlace se activa con el CU 04 #}
-      <span class="enlace pendiente" title="CU 04">Ver salud →</span>
+      <a class="enlace" href="{% url 'tablero:dashboard' %}?proyecto={{ proyecto.pk }}">Ver salud →</a>
     </div>
   </li>
   {% endwith %}

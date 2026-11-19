@@ -9,8 +9,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from apps.proyectos.metricas import METRICAS
-from apps.proyectos.models import MetaProyecto, Periodo, Proyecto
+from apps.proyectos.models import Periodo, Proyecto
 
 Usuario = get_user_model()
 CLAVE = "Clave-segura-123"
@@ -48,7 +47,6 @@ class BaseCU01(TestCase):
         proyecto = Proyecto.objects.create(
             usuario=usuario or self.ana, nombre=nombre, marco_trabajo="Kanban"
         )
-        proyecto.crear_metas_sugeridas()
         for nombre_periodo, inicio, fin in periodos:
             Periodo.objects.create(
                 proyecto=proyecto,
@@ -72,7 +70,7 @@ class FlujoNormalTests(BaseCU01):
         self.assertContains(respuesta, 'maxlength="100"')
         self.assertContains(respuesta, 'type="date"')
 
-    def test_registrar_proyecto_crea_proyecto_metas_y_periodo(self):
+    def test_registrar_proyecto_crea_proyecto_y_periodo(self):
         respuesta = self.client.post(URL_NUEVO, datos_proyecto())
 
         proyecto = Proyecto.objects.get()
@@ -81,13 +79,6 @@ class FlujoNormalTests(BaseCU01):
         self.assertEqual(proyecto.usuario, self.ana)
         self.assertEqual((periodo.nombre, periodo.fecha_inicio), ("Entrega 1", date(2026, 12, 12)))
         self.assertEqual(proyecto.periodo_actual, periodo)
-
-    def test_metas_sugeridas_al_crear(self):
-        """R2: 100 %, ≥ 95 %, 100 %, 100 %, 100 %."""
-        self.client.post(URL_NUEVO, datos_proyecto())
-        metas = dict(MetaProyecto.objects.values_list("metrica", "valor"))
-        self.assertEqual(metas, {m.clave: m.meta_sugerida for m in METRICAS})
-        self.assertEqual(sorted(metas.values()), [95, 100, 100, 100, 100])
 
     def test_descripcion_es_opcional_y_se_guarda(self):
         self.client.post(URL_NUEVO, datos_proyecto(descripcion="Proyecto de la materia"))
@@ -115,7 +106,7 @@ class FlujoNormalTests(BaseCU01):
 
 
 class MisProyectosTests(BaseCU01):
-    """Paso 1 y R4: tarjetas con nombre, marco, periodo actual y métricas en meta."""
+    """Paso 1 y R4: tarjetas con nombre, marco, periodo actual y estado de salud."""
 
     def test_sin_proyectos_muestra_estado_vacio(self):
         respuesta = self.client.get(URL_MIS_PROYECTOS)
@@ -128,7 +119,8 @@ class MisProyectosTests(BaseCU01):
         self.assertContains(respuesta, "Dashboard SQA")
         self.assertContains(respuesta, "Kanban · Periodo actual: Entrega 1")
         self.assertContains(respuesta, "12/12/2026 – 24/12/2026")
-        self.assertContains(respuesta, "Métricas en meta: 0/5")
+        self.assertContains(respuesta, "Sin evaluar")
+        self.assertContains(respuesta, "Sin medidas")
         self.assertContains(respuesta, "Nuevo periodo")
 
     def test_periodo_actual_es_el_de_inicio_mas_reciente(self):
@@ -207,7 +199,6 @@ class FA3NuevoPeriodoTests(BaseCU01):
         self.assertEqual(self.proyecto.periodo_actual, nuevo)
         self.assertEqual(self.proyecto.periodos.count(), 2)
         self.assertEqual(Proyecto.objects.count(), 1)
-        self.assertEqual(MetaProyecto.objects.count(), 5)
 
     def test_no_modifica_datos_del_proyecto(self):
         self.client.post(self.url, datos_periodo(nombre="Otro nombre", marco_trabajo="Scrum"))
@@ -285,10 +276,10 @@ class EnvioRepetidoTests(BaseCU01):
         self.client.post(URL_NUEVO, datos_proyecto())
         self.assertEqual(Proyecto.objects.count(), 1)
 
-    def test_reenviar_nuevo_proyecto_no_duplica_metas_ni_periodos(self):
+    def test_reenviar_nuevo_proyecto_no_duplica_periodos(self):
         self.client.post(URL_NUEVO, datos_proyecto())
         self.client.post(URL_NUEVO, datos_proyecto())
-        self.assertEqual((MetaProyecto.objects.count(), Periodo.objects.count()), (5, 1))
+        self.assertEqual(Periodo.objects.count(), 1)
 
     def test_reenviar_nuevo_periodo_no_duplica(self):
         proyecto = self.crear_proyecto()
@@ -346,3 +337,36 @@ class SeguridadTests(BaseCU01):
 
     def test_formulario_lleva_csrf(self):
         self.assertContains(self.client.get(URL_NUEVO), "csrfmiddlewaretoken")
+
+
+class TarjetaConSaludTests(BaseCU01):
+    """R4: la tarjeta de Mis proyectos muestra el estado de salud del periodo actual."""
+
+    def medidas_en_riesgo(self, periodo):
+        # M1 90 %, M2 96 %, M3 85 %, M4 3.5 → índice 72, «En riesgo».
+        periodo.funciones_requeridas, periodo.funciones_entregadas = 10, 9
+        periodo.casos_ejecutados, periodo.casos_aprobados = 25, 24
+        periodo.requisitos_verificables, periodo.requisitos_con_prueba = 20, 17
+        periodo.defectos_codigo, periodo.kloc = 7, 2
+        periodo.save()
+
+    def test_con_medidas_muestra_estado_e_indice(self):
+        proyecto = self.crear_proyecto()
+        self.medidas_en_riesgo(proyecto.periodo_actual)
+        respuesta = self.client.get(URL_MIS_PROYECTOS)
+        self.assertContains(respuesta, "En riesgo")
+        self.assertContains(respuesta, "Índice 72.0")
+
+    def test_con_medidas_incompletas_es_sin_evaluar(self):
+        proyecto = self.crear_proyecto()
+        periodo = proyecto.periodo_actual
+        periodo.casos_ejecutados = 10
+        periodo.save()
+        respuesta = self.client.get(URL_MIS_PROYECTOS)
+        self.assertContains(respuesta, "Sin evaluar")
+        self.assertContains(respuesta, "Datos incompletos")
+
+    def test_enlace_ver_salud_abre_el_dashboard_del_proyecto(self):
+        proyecto = self.crear_proyecto()
+        respuesta = self.client.get(URL_MIS_PROYECTOS)
+        self.assertContains(respuesta, f"{reverse('tablero:dashboard')}?proyecto={proyecto.pk}")

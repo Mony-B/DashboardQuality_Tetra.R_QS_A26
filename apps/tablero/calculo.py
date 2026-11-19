@@ -37,6 +37,9 @@ class DefinicionMetrica:
     corte_verde: Decimal
     corte_amarillo: Decimal
     mayor_es_mejor: bool = True
+    codigo: str = ""  # M1…M4
+    # (campo del periodo, cómo se nombra en los mensajes): numerador y denominador.
+    medidas: tuple[tuple[str, str], ...] = ()
 
 
 DEFINICIONES = (
@@ -48,6 +51,11 @@ DEFINICIONES = (
         25,
         Decimal("95"),
         Decimal("80"),
+        codigo="M1",
+        medidas=(
+            ("funciones_entregadas", "las funciones entregadas y aceptadas del periodo"),
+            ("funciones_requeridas", "las funciones requeridas del periodo"),
+        ),
     ),
     DefinicionMetrica(
         "tasa_aprobacion",
@@ -57,6 +65,11 @@ DEFINICIONES = (
         30,
         Decimal("95"),
         Decimal("85"),
+        codigo="M2",
+        medidas=(
+            ("casos_aprobados", "los casos de prueba aprobados del periodo"),
+            ("casos_ejecutados", "los casos de prueba ejecutados del periodo"),
+        ),
     ),
     DefinicionMetrica(
         "cobertura_requisitos",
@@ -66,6 +79,11 @@ DEFINICIONES = (
         20,
         Decimal("95"),
         Decimal("80"),
+        codigo="M3",
+        medidas=(
+            ("requisitos_con_prueba", "los requisitos con al menos un caso de prueba"),
+            ("requisitos_verificables", "los requisitos verificables del periodo"),
+        ),
     ),
     DefinicionMetrica(
         "densidad_defectos",
@@ -76,6 +94,11 @@ DEFINICIONES = (
         Decimal("2"),
         Decimal("5"),
         mayor_es_mejor=False,
+        codigo="M4",
+        medidas=(
+            ("defectos_codigo", "los defectos del código detectados"),
+            ("kloc", "el tamaño del código (KLOC)"),
+        ),
     ),
 )
 
@@ -202,3 +225,44 @@ def evaluar(medidas):
     estado = limitar_por_rojo(estado_por_indice(indice), resultados)
     limitado = estado != estado_por_indice(indice)
     return Salud(tuple(resultados), indice, estado, limitado)
+
+
+def formatear(valor):
+    """Número con un decimal para mostrar («90.0»); el semáforo usa el valor exacto."""
+    return f"{redondear(valor)}"
+
+
+def motivo(resultado):
+    """Por qué una métrica es amarilla o roja y qué umbral incumple (post-condición 2).
+
+    Devuelve ``""`` si la métrica es verde o no tiene datos.
+    """
+    if resultado.semaforo not in (AMARILLO, ROJO):
+        return ""
+    d = resultado.definicion
+    etiqueta = "Amarillo" if resultado.semaforo == AMARILLO else "Rojo"
+    valor = formatear(resultado.valor)
+    if d.mayor_es_mejor:
+        umbral = d.corte_verde if resultado.semaforo == AMARILLO else d.corte_amarillo
+        return f"{etiqueta}: {valor} % es menor que {umbral:f} %."
+    umbral = d.corte_verde if resultado.semaforo == AMARILLO else d.corte_amarillo
+    return f"{etiqueta}: {valor} supera {umbral:f}."
+
+
+def medida_faltante(definicion, medidas):
+    """Mensaje de qué medida falta para calcular la métrica (FA-1); ``""`` si no falta ninguna."""
+    for campo, nombre in definicion.medidas:
+        if getattr(medidas, campo) is None:
+            return f"Falta registrar {nombre}."
+    campo, nombre = definicion.medidas[1]  # el denominador
+    if Decimal(getattr(medidas, campo)) <= 0:
+        return f"No se puede calcular: el total de {nombre} es 0."
+    return ""
+
+
+def motivo_r18(salud):
+    """Texto de FA-2: el índice es saludable, pero una métrica en rojo limita el estado."""
+    if not salud.limitado_por_rojo:
+        return ""
+    rojas = [r.definicion.nombre.lower() for r in salud.metricas if r.semaforo == ROJO]
+    return f"El índice es saludable, pero {' y '.join(rojas)} está en rojo."

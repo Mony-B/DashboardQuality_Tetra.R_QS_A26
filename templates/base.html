@@ -19,8 +19,8 @@
       <a class="menu-item{% if app == 'proyectos' %} activo{% endif %}" href="{% url 'proyectos:mis_proyectos' %}">Mis proyectos</a>
       <a class="menu-item{% if app == 'medidas' %} activo{% endif %}" href="{% url 'medidas:inicio' %}">Captura de medidas</a>
       <a class="menu-item{% if app == 'actividades' %} activo{% endif %}" href="{% url 'actividades:inicio' %}">Actividades SQA</a>
-      {# Se vuelven enlaces conforme se agreguen los casos de uso #}
-      <span class="menu-item pendiente" title="CU 04">Dashboard</span>
+      <a class="menu-item{% if app == 'tablero' %} activo{% endif %}" href="{% url 'tablero:dashboard' %}">Dashboard</a>
+      {# Se vuelve enlace cuando se agregue el CU 05 #}
       <span class="menu-item pendiente" title="CU 05">Reportes</span>
     </nav>
     <form method="post" action="{% url 'cuentas:cerrar_sesion' %}" class="salir">
