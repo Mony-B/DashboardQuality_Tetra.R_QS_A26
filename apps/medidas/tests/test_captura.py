@@ -283,7 +283,7 @@ class ValidacionTests(BaseCapturaTests):
         self.assertEqual(self.periodo.funciones_entregadas, 8)
 
     def test_varios_errores_a_la_vez_se_muestran_junto_a_cada_campo(self):
-        respuesta = self.enviar(funciones_entregadas="12", casos_aprobados="", kloc="0")
+        respuesta = self.enviar(funciones_entregadas="12", kloc="0")
         errores = respuesta.context["form"].errors
         self.assertEqual(set(errores), {"funciones_entregadas", "kloc"})
 
