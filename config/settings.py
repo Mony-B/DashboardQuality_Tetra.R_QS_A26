@@ -40,6 +40,12 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = _env_lista("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://quaqlity.up.railway.app",
+    "https://*.up.railway.app",
+]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 if not DEBUG:
     SESSION_COOKIE_SECURE = _env_bool("DJANGO_COOKIES_SEGURAS", por_defecto=True)
     CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
