@@ -37,9 +37,7 @@ def dashboard_salud_view(request):
     clave = request.GET.get("metrica")
     definicion = next((d for d in c.DEFINICIONES if d.clave == clave), c.DEFINICIONES[0])
     periodos = sorted(proyecto.periodos.all(), key=lambda p: p.fecha_inicio)
-    puntos = [
-        (p.nombre, c.valores(c.Medidas.de_periodo(p))[definicion.clave]) for p in periodos
-    ]
+    puntos = [(p.nombre, c.valores(c.Medidas.de_periodo(p))[definicion.clave]) for p in periodos]
     tendencia = grafica.construir(definicion, puntos)
 
     contexto = {
