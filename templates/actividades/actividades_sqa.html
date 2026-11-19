@@ -53,7 +53,7 @@
     <div class="campo{% if form.fecha.errors %} campo-error{% endif %}">
       <label for="{{ form.fecha.id_for_label }}">{{ form.fecha.label }}</label>
       {{ form.fecha }}
-      {% for error in form.fecha.errors %}<p class="error">{{ error }}</p>{% empty %}<small class="ayuda">Elige la fecha en el calendario</small>{% endfor %}
+      {% for error in form.fecha.errors %}<p class="error">{{ error }}</p>{% empty %}<small class="ayuda">Dentro de las fechas del periodo</small>{% endfor %}
     </div>
   </div>
   <p class="aviso" role="note"><strong>Importante:</strong> una vez planeada, la actividad ya no se podrá modificar. Solo podrás cambiar su estado y su enlace a la evidencia.</p>

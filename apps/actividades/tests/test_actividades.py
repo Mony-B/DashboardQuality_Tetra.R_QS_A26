@@ -167,9 +167,24 @@ class PlanearTests(BaseTests):
         self.planear()
         self.assertEqual(Actividad.objects.count(), 2)
 
-    def test_la_fecha_es_libre_aunque_este_fuera_del_periodo(self):
-        self.planear(fecha="2030-01-01")
-        self.assertEqual(Actividad.objects.get().fecha, date(2030, 1, 1))
+    def test_la_fecha_debe_estar_dentro_del_periodo(self):
+        for fecha in ("2026-12-11", "2026-12-25", "2030-01-01"):
+            with self.subTest(fecha=fecha):
+                respuesta = self.planear(fecha=fecha)
+                self.assertContains(
+                    respuesta, "La fecha debe estar entre el 12/12/2026 y el 24/12/2026."
+                )
+                self.assertEqual(Actividad.objects.count(), 0)
+
+    def test_las_fechas_de_inicio_y_fin_del_periodo_si_se_aceptan(self):
+        self.planear(fecha="2026-12-12")
+        self.planear(fecha="2026-12-24")
+        self.assertEqual(Actividad.objects.count(), 2)
+
+    def test_el_selector_de_fecha_limita_al_periodo(self):
+        respuesta = self.client.get(self.url_lista)
+        self.assertContains(respuesta, 'min="2026-12-12"')
+        self.assertContains(respuesta, 'max="2026-12-24"')
 
     def test_las_cuatro_validaciones_de_campo_vacio_juntas(self):
         respuesta = self.client.post(

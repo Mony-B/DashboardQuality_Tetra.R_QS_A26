@@ -46,6 +46,25 @@ class ActividadForm(forms.ModelForm):
         model = Actividad
         fields = ("tecnica", "artefacto", "responsable", "fecha")
 
+    def __init__(self, *args, periodo=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.periodo = periodo
+        if periodo is not None:
+            self.fields["fecha"].widget.attrs.update(
+                min=periodo.fecha_inicio.isoformat(), max=periodo.fecha_fin.isoformat()
+            )
+
+    def clean_fecha(self):
+        """La actividad se planea dentro de las fechas del periodo, extremos incluidos."""
+        fecha = self.cleaned_data["fecha"]
+        periodo = self.periodo
+        if periodo is not None and not periodo.fecha_inicio <= fecha <= periodo.fecha_fin:
+            raise forms.ValidationError(
+                "La fecha debe estar entre el "
+                f"{periodo.fecha_inicio:%d/%m/%Y} y el {periodo.fecha_fin:%d/%m/%Y}."
+            )
+        return fecha
+
 
 class EstadoForm(forms.Form):
     estado = forms.ChoiceField(choices=Actividad.Estado.choices)

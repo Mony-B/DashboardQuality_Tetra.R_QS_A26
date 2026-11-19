@@ -53,7 +53,7 @@ def _pantalla(request, periodo, form=None, error_enlace=None):
     contexto = {
         "periodo": periodo,
         "proyecto": periodo.proyecto,
-        "form": form or ActividadForm(),
+        "form": form or ActividadForm(periodo=periodo),
         "actividades": periodo.actividades.all(),
         "estados": Actividad.Estado.choices,
         # FA-2: (id de la actividad, texto escrito, mensaje) para marcar su fila.
@@ -82,9 +82,9 @@ def actividades_view(request, periodo_id):
 
 @require_POST
 def planear_actividad_view(request, periodo_id):
-    """Pasos 5 a 7: valida los cuatro datos y registra la actividad en estado «planeada»."""
+    """Pasos 5 a 7: valida los cuatro datos (fecha dentro del periodo) y registra la actividad."""
     periodo = _periodo_del_usuario(request, periodo_id)
-    form = ActividadForm(request.POST)
+    form = ActividadForm(request.POST, periodo=periodo)
     if not form.is_valid():  # FA-1: se conserva lo capturado y se marca cada campo
         return _pantalla(request, periodo, form=form)
     actividad = form.save(commit=False)
